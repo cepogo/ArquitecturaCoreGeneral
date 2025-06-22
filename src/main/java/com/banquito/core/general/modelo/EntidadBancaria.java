@@ -1,14 +1,21 @@
 package com.banquito.core.general.modelo;
 
+import com.banquito.core.general.enums.EstadoGeneralEnum;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
 
+
+@Setter
+@Getter
 @Entity
 @Table(name = "entidades_bancarias")
 public class EntidadBancaria {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_entidad_bancaria", nullable = false)
     private Integer id;
 
@@ -21,59 +28,12 @@ public class EntidadBancaria {
     @Column(name = "codigo_internacional", nullable = false, length = 20)
     private String codigoInternacional;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false, length = 15)
-    private String estado;
+    private EstadoGeneralEnum estado;
 
     @Column(name = "version", nullable = false, precision = 9)
     private BigDecimal version;
-   
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getCodigoLocal() {
-        return codigoLocal;
-    }
-
-    public void setCodigoLocal(String codigoLocal) {
-        this.codigoLocal = codigoLocal;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public String getCodigoInternacional() {
-        return codigoInternacional;
-    }
-
-    public void setCodigoInternacional(String codigoInternacional) {
-        this.codigoInternacional = codigoInternacional;
-    }
-
-    public String getEstado() {
-        return estado;
-    }
-
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
-
-    public BigDecimal getVersion() {
-        return version;
-    }
-
-    public void setVersion(BigDecimal version) {
-        this.version = version;
-    }
 
     @Override
     public int hashCode() {

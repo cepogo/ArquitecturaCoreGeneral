@@ -2,11 +2,15 @@ package com.banquito.core.general.modelo;
 
 import com.banquito.core.general.enums.EstadoGeneralEnum;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.Objects;
 
 
+@Setter
+@Getter
 @Entity
 @Table(name = "paises")
 public class Pais {
@@ -33,46 +37,6 @@ public class Pais {
 
     public Pais(String idPais) {
         this.idPais = idPais;
-    }
-
-    public String getIdPais() {
-        return idPais;
-    }
-
-    public void setIdPais(String idPais) {
-        this.idPais = idPais;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public String getCodigoTelefono() {
-        return codigoTelefono;
-    }
-
-    public void setCodigoTelefono(String codigoTelefono) {
-        this.codigoTelefono = codigoTelefono;
-    }
-
-    public EstadoGeneralEnum getEstado() {
-        return estado;
-    }
-
-    public void setEstado(EstadoGeneralEnum estado) {
-        this.estado = estado;
-    }
-
-    public BigDecimal getVersion() {
-        return version;
-    }
-
-    public void setVersion(BigDecimal version) {
-        this.version = version;
     }
 
     @Override

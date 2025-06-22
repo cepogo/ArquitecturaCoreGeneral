@@ -1,11 +1,18 @@
 package com.banquito.core.general.modelo;
 
+import com.banquito.core.general.enums.EstadoGeneralEnum;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "monedas")
 public class Moneda {
+
     @Id
     @Column(name = "id_moneda", nullable = false, length = 3)
     private String idMoneda;
@@ -19,60 +26,12 @@ public class Moneda {
     @Column(name = "simbolo", nullable = false, length = 5)
     private String simbolo;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false, length = 15)
-    private String estado;
+    private EstadoGeneralEnum estado;
 
     @Column(name = "version", nullable = false, precision = 9)
     private BigDecimal version;
-
-    // Getters y Setters
-    public String getIdMoneda() {
-        return idMoneda;
-    }
-
-    public void setIdMoneda(String idMoneda) {
-        this.idMoneda = idMoneda;
-    }
-
-    public String getIdPais() {
-        return idPais;
-    }
-
-    public void setIdPais(String idPais) {
-        this.idPais = idPais;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public String getSimbolo() {
-        return simbolo;
-    }
-
-    public void setSimbolo(String simbolo) {
-        this.simbolo = simbolo;
-    }
-
-    public String getEstado() {
-        return estado;
-    }
-
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
-
-    public BigDecimal getVersion() {
-        return version;
-    }
-
-    public void setVersion(BigDecimal version) {
-        this.version = version;
-    }
 
     @Override
     public int hashCode() {

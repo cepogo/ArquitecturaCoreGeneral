@@ -1,5 +1,6 @@
 package com.banquito.core.general.repositorio;
 
+import com.banquito.core.general.enums.EstadoGeneralEnum;
 import com.banquito.core.general.modelo.EntidadBancaria;
 import com.banquito.core.general.modelo.EntidadBancariaMoneda;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,5 +11,6 @@ import java.util.List;
 @Repository
 public interface EntidadBancariaMonedaRepositorio extends JpaRepository<EntidadBancariaMoneda, Integer> {
     List<EntidadBancariaMoneda> findByIdEntidadBancaria(EntidadBancaria entidadBancaria);
-    List<EntidadBancariaMoneda> findByIdEntidadBancariaAndEstado(EntidadBancaria entidadBancaria, String estado);
+    List<EntidadBancariaMoneda> findByIdEntidadBancariaAndEstado(EntidadBancaria idEntidadBancaria, EstadoGeneralEnum estado);
+    List<EntidadBancariaMoneda> findByIdMonedaIn(List<String> idsMoneda);
 }

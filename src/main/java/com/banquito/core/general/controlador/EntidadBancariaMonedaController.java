@@ -2,7 +2,9 @@ package com.banquito.core.general.controlador;
 
 import com.banquito.core.general.dto.EntidadBancariaDTO;
 import com.banquito.core.general.dto.EntidadBancariaMonedaDTO;
+import com.banquito.core.general.dto.EntidadBancariaUpdateDTO;
 import com.banquito.core.general.dto.MonedaDTO;
+import com.banquito.core.general.enums.EstadoGeneralEnum;
 import com.banquito.core.general.servicio.EntidadBancariaMonedaServicio;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -35,14 +37,14 @@ public class EntidadBancariaMonedaController {
         return ResponseEntity.ok(servicio.obtenerPorId(id));
     }
 
-    @PutMapping("/{id}")
-    @Operation(summary = "Modificar entidad bancaria", description = "Actualiza los datos de una entidad bancaria existente.")
+    @PatchMapping("/{id}")
+    @Operation(summary = "Actualización parcial de entidad bancaria", description = "Aplica cambios parciales a una entidad bancaria. Solo los campos incluidos en el body serán modificados.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Entidad modificada exitosamente"),
             @ApiResponse(responseCode = "404", description = "Entidad no encontrada")
     })
-    public ResponseEntity<EntidadBancariaDTO> modificarEntidadBancaria(@PathVariable Integer id, @Valid @RequestBody EntidadBancariaDTO dto) {
-        return ResponseEntity.ok(servicio.modificarEntidadBancaria(id, dto));
+    public ResponseEntity<EntidadBancariaDTO> modificarParcialmenteEntidadBancaria(@PathVariable Integer id, @RequestBody EntidadBancariaUpdateDTO dto) {
+        return ResponseEntity.ok(servicio.modificarParcialmenteEntidadBancaria(id, dto));
     }
 
     @DeleteMapping("/{id}")
@@ -83,7 +85,7 @@ public class EntidadBancariaMonedaController {
             @ApiResponse(responseCode = "200", description = "Estado cambiado exitosamente"),
             @ApiResponse(responseCode = "404", description = "Relación no encontrada")
     })
-    public ResponseEntity<EntidadBancariaMonedaDTO> cambiarEstadoMonedaDeEntidad(@PathVariable Integer idRelacion, @RequestParam String nuevoEstado) {
+    public ResponseEntity<EntidadBancariaMonedaDTO> cambiarEstadoMonedaDeEntidad(@PathVariable Integer idRelacion, @RequestParam EstadoGeneralEnum nuevoEstado) {
         return ResponseEntity.ok(servicio.cambiarEstadoMonedaDeEntidad(idRelacion, nuevoEstado));
     }
 

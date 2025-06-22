@@ -1,11 +1,18 @@
 package com.banquito.core.general.modelo;
 
+import com.banquito.core.general.enums.EstadoGeneralEnum;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "entidades_bancarias_monedas")
 public class EntidadBancariaMoneda {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_entidad_bancaria_moneda", nullable = false)
@@ -18,51 +25,18 @@ public class EntidadBancariaMoneda {
     @Column(name = "id_moneda", nullable = false, length = 3)
     private String idMoneda;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false, length = 15)
-    private String estado;
+    private EstadoGeneralEnum estado;
 
     @Column(name = "version", nullable = false, precision = 9)
     private BigDecimal version;
 
-    // Getters y Setters
-    public Integer getIdEntidadBancariaMoneda() {
-        return idEntidadBancariaMoneda;
+    public EntidadBancariaMoneda() {
     }
 
-    public void setIdEntidadBancariaMoneda(Integer idEntidadBancariaMoneda) {
+    public EntidadBancariaMoneda(Integer idEntidadBancariaMoneda) {
         this.idEntidadBancariaMoneda = idEntidadBancariaMoneda;
-    }
-
-    public EntidadBancaria getIdEntidadBancaria() {
-        return idEntidadBancaria;
-    }
-
-    public void setIdEntidadBancaria(EntidadBancaria idEntidadBancaria) {
-        this.idEntidadBancaria = idEntidadBancaria;
-    }
-
-    public String getIdMoneda() {
-        return idMoneda;
-    }
-
-    public void setIdMoneda(String idMoneda) {
-        this.idMoneda = idMoneda;
-    }
-
-    public String getEstado() {
-        return estado;
-    }
-
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
-
-    public BigDecimal getVersion() {
-        return version;
-    }
-
-    public void setVersion(BigDecimal version) {
-        this.version = version;
     }
 
     @Override

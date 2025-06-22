@@ -2,8 +2,7 @@ package com.banquito.core.general.mapper;
 
 import com.banquito.core.general.dto.PaisDTO;
 import com.banquito.core.general.modelo.Pais;
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingConstants;
+import org.mapstruct.*;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface PaisMapper {

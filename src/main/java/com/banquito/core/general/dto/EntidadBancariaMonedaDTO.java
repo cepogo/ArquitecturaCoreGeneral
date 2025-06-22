@@ -1,12 +1,17 @@
 package com.banquito.core.general.dto;
 
+import com.banquito.core.general.enums.EstadoGeneralEnum;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
 
 public class EntidadBancariaMonedaDTO {
 
     private Integer idEntidadBancariaMoneda;
 
+    @Setter
+    @Getter
     @NotNull(message = "El ID de la entidad bancaria no puede ser nulo")
     private Integer idEntidadBancaria;
 
@@ -16,13 +21,6 @@ public class EntidadBancariaMonedaDTO {
 
     @NotNull(message = "El estado no puede ser nulo")
     @Size(max = 15, message = "El estado debe tener máximo 15 caracteres")
-    private String estado;
+    private EstadoGeneralEnum estado;
 
-    public Integer getIdEntidadBancaria() {
-        return idEntidadBancaria;
-    }
-
-    public void setIdEntidadBancaria(Integer idEntidadBancaria) {
-        this.idEntidadBancaria = idEntidadBancaria;
-    }
 }

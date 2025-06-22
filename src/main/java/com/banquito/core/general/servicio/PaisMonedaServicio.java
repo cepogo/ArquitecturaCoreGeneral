@@ -2,14 +2,17 @@ package com.banquito.core.general.servicio;
 
 import com.banquito.core.general.dto.MonedaDTO;
 import com.banquito.core.general.dto.PaisDTO;
+import com.banquito.core.general.dto.PaisUpdateDTO;
 import com.banquito.core.general.enums.EstadoGeneralEnum;
 import com.banquito.core.general.excepcion.ActualizarEntidadException;
 import com.banquito.core.general.excepcion.CrearEntidadException;
 import com.banquito.core.general.excepcion.EntidadNoEncontradaException;
 import com.banquito.core.general.mapper.MonedaMapper;
 import com.banquito.core.general.mapper.PaisMapper;
+import com.banquito.core.general.modelo.EntidadBancariaMoneda;
 import com.banquito.core.general.modelo.Moneda;
 import com.banquito.core.general.modelo.Pais;
+import com.banquito.core.general.repositorio.EntidadBancariaMonedaRepositorio;
 import com.banquito.core.general.repositorio.MonedaRepositorio;
 import com.banquito.core.general.repositorio.PaisRepositorio;
 import jakarta.transaction.Transactional;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,13 +29,15 @@ public class PaisMonedaServicio {
     private final MonedaRepositorio monedaRepositorio;
     private final PaisMapper paisMapper;
     private final MonedaMapper monedaMapper;
+    private final EntidadBancariaMonedaRepositorio entidadBancariaMonedaRepositorio;
 
 
-    public PaisMonedaServicio(PaisRepositorio paisRepositorio, MonedaRepositorio monedaRepositorio, PaisMapper paisMapper, MonedaMapper monedaMapper) {
+    public PaisMonedaServicio(PaisRepositorio paisRepositorio, MonedaRepositorio monedaRepositorio, PaisMapper paisMapper, MonedaMapper monedaMapper, EntidadBancariaMonedaRepositorio entidadBancariaMonedaRepositorio) {
         this.paisRepositorio = paisRepositorio;
         this.monedaRepositorio = monedaRepositorio;
         this.paisMapper = paisMapper;
         this.monedaMapper = monedaMapper;
+        this.entidadBancariaMonedaRepositorio = entidadBancariaMonedaRepositorio;
     }
 
     @Transactional
@@ -53,14 +59,18 @@ public class PaisMonedaServicio {
     }
 
     @Transactional
-    public PaisDTO actualizarPais(String idPais, PaisDTO paisDTO) {
+    public PaisDTO actualizarParcialmentePais(String idPais, PaisUpdateDTO paisUpdateDTO) {
         Pais pais = paisRepositorio.findById(idPais)
                 .orElseThrow(() -> new EntidadNoEncontradaException("No se encontró el país con ID: " + idPais, 2, "Pais"));
 
-        pais.setNombre(paisDTO.getNombre());
-        pais.setCodigoTelefono(paisDTO.getCodigoTelefono());
+        Optional.ofNullable(paisUpdateDTO.getNombre()).ifPresent(pais::setNombre);
+        Optional.ofNullable(paisUpdateDTO.getCodigoTelefono()).ifPresent(pais::setCodigoTelefono);
+        Optional.ofNullable(paisUpdateDTO.getEstado()).ifPresent(pais::setEstado);
+
         pais.setVersion(pais.getVersion().add(BigDecimal.ONE));
-        return paisMapper.toDTO(paisRepositorio.save(pais));
+        paisRepositorio.save(pais);
+
+        return paisMapper.toDTO(pais);
     }
 
     @Transactional
@@ -77,10 +87,20 @@ public class PaisMonedaServicio {
         paisRepositorio.save(pais);
 
         List<Moneda> monedas = monedaRepositorio.findByIdPais(idPais);
+        List<String> idsMonedas = monedas.stream().map(Moneda::getIdMoneda).toList();
         for (Moneda moneda : monedas) {
-            moneda.setEstado(EstadoGeneralEnum.INACTIVO.getValor());
+            moneda.setEstado(EstadoGeneralEnum.INACTIVO);
             moneda.setVersion(moneda.getVersion().add(BigDecimal.ONE));
             monedaRepositorio.save(moneda);
+        }
+
+        if (!idsMonedas.isEmpty()) {
+            List<EntidadBancariaMoneda> relaciones = entidadBancariaMonedaRepositorio.findByIdMonedaIn(idsMonedas);
+            for (EntidadBancariaMoneda relacion : relaciones) {
+                relacion.setEstado(EstadoGeneralEnum.INACTIVO);
+                relacion.setVersion(relacion.getVersion().add(BigDecimal.ONE));
+                entidadBancariaMonedaRepositorio.save(relacion);
+            }
         }
     }
 
@@ -98,15 +118,51 @@ public class PaisMonedaServicio {
 
         Moneda moneda = monedaMapper.toEntity(monedaDTO);
         moneda.setIdPais(idPais);
-        moneda.setEstado(EstadoGeneralEnum.ACTIVO.getValor());
+        moneda.setEstado(EstadoGeneralEnum.ACTIVO);
         moneda.setVersion(BigDecimal.ONE);
         return monedaMapper.toDTO(monedaRepositorio.save(moneda));
     }
 
     public List<MonedaDTO> listarMonedasActivas() {
-        return monedaRepositorio.findByEstado(EstadoGeneralEnum.ACTIVO.getValor())
+        return monedaRepositorio.findByEstado(EstadoGeneralEnum.ACTIVO)
                 .stream()
                 .map(monedaMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public MonedaDTO actualizarParcialmenteMoneda(String idMoneda, MonedaDTO monedaDTO) {
+        Moneda moneda = monedaRepositorio.findById(idMoneda)
+                .orElseThrow(() -> new EntidadNoEncontradaException("No se encontró la moneda con ID: " + idMoneda, 2, "Moneda"));
+
+        Optional.ofNullable(monedaDTO.getNombre()).ifPresent(moneda::setNombre);
+        Optional.ofNullable(monedaDTO.getSimbolo()).ifPresent(moneda::setSimbolo);
+        Optional.ofNullable(monedaDTO.getEstado()).ifPresent(moneda::setEstado);
+
+        moneda.setVersion(moneda.getVersion().add(BigDecimal.ONE));
+        monedaRepositorio.save(moneda);
+
+        return monedaMapper.toDTO(moneda);
+    }
+
+    @Transactional
+    public void eliminarMoneda(String idMoneda) {
+        Moneda moneda = monedaRepositorio.findById(idMoneda)
+                .orElseThrow(() -> new EntidadNoEncontradaException("No se encontró la moneda con ID: " + idMoneda, 2, "Moneda"));
+
+        if (moneda.getEstado().equals(EstadoGeneralEnum.INACTIVO)) {
+            throw new ActualizarEntidadException("Moneda", "La moneda ya se encuentra inactiva.");
+        }
+
+        moneda.setEstado(EstadoGeneralEnum.INACTIVO);
+        moneda.setVersion(moneda.getVersion().add(BigDecimal.ONE));
+        monedaRepositorio.save(moneda);
+
+        List<EntidadBancariaMoneda> relaciones = entidadBancariaMonedaRepositorio.findByIdMonedaIn(List.of(idMoneda));
+        for (EntidadBancariaMoneda relacion : relaciones) {
+            relacion.setEstado(EstadoGeneralEnum.INACTIVO);
+            relacion.setVersion(relacion.getVersion().add(BigDecimal.ONE));
+            entidadBancariaMonedaRepositorio.save(relacion);
+        }
     }
 }
