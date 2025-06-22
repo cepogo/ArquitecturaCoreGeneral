@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "entidades_bancarias_monedas")
-public class EntidadesBancariasMonedas {
+public class EntidadBancariaMoneda {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_entidad_bancaria_moneda", nullable = false)
@@ -13,7 +13,7 @@ public class EntidadesBancariasMonedas {
 
     @ManyToOne
     @JoinColumn(name = "id_entidad_bancaria", referencedColumnName = "id_entidad_bancaria")
-    private EntidadesBancarias idEntidadBancaria;
+    private EntidadBancaria idEntidadBancaria;
 
     @Column(name = "id_moneda", nullable = false, length = 3)
     private String idMoneda;
@@ -33,11 +33,11 @@ public class EntidadesBancariasMonedas {
         this.idEntidadBancariaMoneda = idEntidadBancariaMoneda;
     }
 
-    public EntidadesBancarias getIdEntidadBancaria() {
+    public EntidadBancaria getIdEntidadBancaria() {
         return idEntidadBancaria;
     }
 
-    public void setIdEntidadBancaria(EntidadesBancarias idEntidadBancaria) {
+    public void setIdEntidadBancaria(EntidadBancaria idEntidadBancaria) {
         this.idEntidadBancaria = idEntidadBancaria;
     }
 
@@ -81,7 +81,7 @@ public class EntidadesBancariasMonedas {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        EntidadesBancariasMonedas other = (EntidadesBancariasMonedas) obj;
+        EntidadBancariaMoneda other = (EntidadBancariaMoneda) obj;
         if (idEntidadBancariaMoneda == null) {
             if (other.idEntidadBancariaMoneda != null)
                 return false;

@@ -6,18 +6,18 @@ import java.util.Date;
 
 @Entity
 @Table(name = "sucursales")
-public class Sucursales {
+public class Sucursal {
     @Id
     @Column(name = "codigo", nullable = false, length = 10)
     private String codigo;
 
     @ManyToOne
     @JoinColumn(name = "id_entidad_bancaria", referencedColumnName = "id_entidad_bancaria")
-    private EntidadesBancarias idEntidadBancaria;
+    private EntidadBancaria idEntidadBancaria;
 
     @ManyToOne
     @JoinColumn(name = "id_locacion", referencedColumnName = "id_locacion")
-    private LocacionesGeograficas idLocacion;
+    private LocacionGeografica idLocacion;
     
     @Column(name = "nombre", nullable = false, length = 30)
     private String nombre;
@@ -59,11 +59,11 @@ public class Sucursales {
         this.codigo = codigo;
     }
 
-    public EntidadesBancarias getIdEntidadBancaria() {
+    public EntidadBancaria getIdEntidadBancaria() {
         return idEntidadBancaria;
     }
 
-    public void setIdEntidadBancaria(EntidadesBancarias idEntidadBancaria) {
+    public void setIdEntidadBancaria(EntidadBancaria idEntidadBancaria) {
         this.idEntidadBancaria = idEntidadBancaria;
     }
 
@@ -171,7 +171,7 @@ public class Sucursales {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Sucursales other = (Sucursales) obj;
+        Sucursal other = (Sucursal) obj;
         if (codigo == null) {
             if (other.codigo != null)
                 return false;
