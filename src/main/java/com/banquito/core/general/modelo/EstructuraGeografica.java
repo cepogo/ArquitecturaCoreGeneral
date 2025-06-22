@@ -14,6 +14,7 @@ public class EstructuraGeografica {
     private EstructuraGeograficaId id;
 
     @ManyToOne
+    @MapsId("idPais")
     @JoinColumn(name = "id_pais", referencedColumnName = "id_pais", nullable = false)
     private Pais idPais;
 

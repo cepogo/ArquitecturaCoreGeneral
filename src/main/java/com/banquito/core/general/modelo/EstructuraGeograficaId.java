@@ -7,7 +7,6 @@ import java.util.Objects;
 
 public class EstructuraGeograficaId {
 
-    @Column(name = "id_pais", nullable = false, length = 2)
     private String idPais;
 
     @Column(name = "codigo_nivel", nullable = false, precision = 1)
