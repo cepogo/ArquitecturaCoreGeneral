@@ -5,7 +5,7 @@ import jakarta.persistence.Column;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-public class EstructurasGeograficasId {
+public class EstructuraGeograficaId {
 
     @Column(name = "id_pais", nullable = false, length = 2)
     private String idPais;
@@ -13,10 +13,10 @@ public class EstructurasGeograficasId {
     @Column(name = "codigo_nivel", nullable = false, precision = 1)
     private BigDecimal codigoNivel;
 
-    public EstructurasGeograficasId() {
+    public EstructuraGeograficaId() {
     }
 
-    public EstructurasGeograficasId(String idPais, BigDecimal codigoNivel) {
+    public EstructuraGeograficaId(String idPais, BigDecimal codigoNivel) {
         this.idPais = idPais;
         this.codigoNivel = codigoNivel;
     }
@@ -40,7 +40,7 @@ public class EstructurasGeograficasId {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        EstructurasGeograficasId that = (EstructurasGeograficasId) o;
+        EstructuraGeograficaId that = (EstructuraGeograficaId) o;
         return Objects.equals(idPais, that.idPais) && Objects.equals(codigoNivel, that.codigoNivel);
     }
 

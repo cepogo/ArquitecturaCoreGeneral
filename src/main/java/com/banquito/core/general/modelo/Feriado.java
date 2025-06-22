@@ -3,16 +3,14 @@ package com.banquito.core.general.modelo;
 import com.banquito.core.general.enums.EstadoGeneralEnum;
 import com.banquito.core.general.enums.TipoFeriadosEnum;
 import jakarta.persistence.*;
-import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.Objects;
 
 @Entity
 @Table(name = "feriados")
-public class Feriados {
+public class Feriado {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,11 +22,11 @@ public class Feriados {
 
     @ManyToOne
     @JoinColumn(name = "id_pais", referencedColumnName = "id_pais")
-    private Paises idPais;
+    private Pais idPais;
 
     @ManyToOne
     @JoinColumn(name = "id_locacion", referencedColumnName = "id_locacion")
-    private LocacionesGeograficas idLocacion;
+    private LocacionGeografica idLocacion;
 
     @Column(name = "nombre", length = 100, nullable = false)
     private String nombre;
@@ -44,10 +42,10 @@ public class Feriados {
     @Column(name = "version", nullable = false, precision = 9)
     private BigDecimal version;
 
-    public Feriados() {
+    public Feriado() {
     }
 
-    public Feriados(Integer idFeriado) {
+    public Feriado(Integer idFeriado) {
         this.idFeriado = idFeriado;
     }
 
@@ -67,19 +65,19 @@ public class Feriados {
         this.fecha = fecha;
     }
 
-    public Paises getIdPais() {
+    public Pais getIdPais() {
         return idPais;
     }
 
-    public void setIdPais(Paises idPais) {
+    public void setIdPais(Pais idPais) {
         this.idPais = idPais;
     }
 
-    public LocacionesGeograficas getIdLocacion() {
+    public LocacionGeografica getIdLocacion() {
         return idLocacion;
     }
 
-    public void setIdLocacion(LocacionesGeograficas idLocacion) {
+    public void setIdLocacion(LocacionGeografica idLocacion) {
         this.idLocacion = idLocacion;
     }
 
@@ -118,7 +116,7 @@ public class Feriados {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        Feriados feriados = (Feriados) o;
+        Feriado feriados = (Feriado) o;
         return Objects.equals(idFeriado, feriados.idFeriado);
     }
 
@@ -129,7 +127,7 @@ public class Feriados {
 
     @Override
     public String toString() {
-        return "Feriados{" +
+        return "Feriado{" +
                 "idFeriado=" + idFeriado +
                 ", fecha=" + fecha +
                 ", idPais=" + idPais +

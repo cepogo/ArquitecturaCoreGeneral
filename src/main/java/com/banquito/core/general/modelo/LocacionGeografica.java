@@ -8,7 +8,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "locaciones_geograficas")
-public class LocacionesGeograficas {
+public class LocacionGeografica {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,14 +17,14 @@ public class LocacionesGeograficas {
 
     @ManyToOne
     @JoinColumn(name = "id_locacion_padre", referencedColumnName = "id_locacion")
-    private LocacionesGeograficas idLocacionPadre;
+    private LocacionGeografica idLocacionPadre;
 
     @ManyToOne
     @JoinColumns({
             @JoinColumn(name = "id_pais", referencedColumnName = "id_pais", nullable = false),
             @JoinColumn(name = "codigo_nivel", referencedColumnName = "codigo_nivel", nullable = false)
     })
-    private EstructurasGeograficas estructuraGeografica;
+    private EstructuraGeografica estructuraGeografica;
 
     @Column(name = "nombre", length = 100, nullable = false)
     private String nombre;
@@ -45,10 +45,10 @@ public class LocacionesGeograficas {
     @Column(name = "version", precision = 9, nullable = false)
     private BigDecimal version;
 
-    public LocacionesGeograficas() {
+    public LocacionGeografica() {
     }
 
-    public LocacionesGeograficas(Integer idLocacion) {
+    public LocacionGeografica(Integer idLocacion) {
         this.idLocacion = idLocacion;
     }
 
@@ -60,19 +60,19 @@ public class LocacionesGeograficas {
         this.idLocacion = idLocacion;
     }
 
-    public LocacionesGeograficas getIdLocacionPadre() {
+    public LocacionGeografica getIdLocacionPadre() {
         return idLocacionPadre;
     }
 
-    public void setIdLocacionPadre(LocacionesGeograficas idLocacionPadre) {
+    public void setIdLocacionPadre(LocacionGeografica idLocacionPadre) {
         this.idLocacionPadre = idLocacionPadre;
     }
 
-    public EstructurasGeograficas getEstructuraGeografica() {
+    public EstructuraGeografica getEstructuraGeografica() {
         return estructuraGeografica;
     }
 
-    public void setEstructuraGeografica(EstructurasGeograficas estructuraGeografica) {
+    public void setEstructuraGeografica(EstructuraGeografica estructuraGeografica) {
         this.estructuraGeografica = estructuraGeografica;
     }
 
@@ -127,7 +127,7 @@ public class LocacionesGeograficas {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        LocacionesGeograficas that = (LocacionesGeograficas) o;
+        LocacionGeografica that = (LocacionGeografica) o;
         return Objects.equals(idLocacion, that.idLocacion);
     }
 
@@ -138,7 +138,7 @@ public class LocacionesGeograficas {
 
     @Override
     public String toString() {
-        return "LocacionesGeograficas{" +
+        return "LocacionGeografica{" +
                 "idLocacion=" + idLocacion +
                 ", idLocacionPadre=" + idLocacionPadre +
                 ", estructuraGeografica=" + estructuraGeografica +

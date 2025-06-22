@@ -2,45 +2,51 @@ package com.banquito.core.general.modelo;
 
 import com.banquito.core.general.enums.EstadoGeneralEnum;
 import jakarta.persistence.*;
-import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 import java.util.Objects;
 
-
 @Entity
-@Table(name = "paises")
-public class Paises {
+@Table(name = "estructuras_geograficas")
+public class EstructuraGeografica {
 
-    @Id
-    @Column(name = "id_pais", length = 2, nullable = false)
-    private String idPais;
+    @EmbeddedId
+    private EstructuraGeograficaId id;
 
-    @Column(name = "nombre", length = 50, nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_pais", referencedColumnName = "id_pais", nullable = false)
+    private Pais idPais;
+
+    @Column(name = "nombre", length = 25, nullable = false)
     private String nombre;
-
-    @Column(name = "codigo_telefono", length = 4, nullable = false)
-    private String codigoTelefono;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "estado", length = 15, nullable = false)
-    private EstadoGeneralEnum estado;
+    private EstadoGeneralEnum estado = EstadoGeneralEnum.ACTIVO;
 
     @Column(name = "version", precision = 9, nullable = false)
     private BigDecimal version;
 
-    public Paises() {
+    public EstructuraGeografica() {
     }
 
-    public Paises(String idPais) {
-        this.idPais = idPais;
+    public EstructuraGeografica(EstructuraGeograficaId id) {
+        this.id = id;
     }
 
-    public String getIdPais() {
+    public EstructuraGeograficaId getId() {
+        return id;
+    }
+
+    public void setId(EstructuraGeograficaId id) {
+        this.id = id;
+    }
+
+    public Pais getIdPais() {
         return idPais;
     }
 
-    public void setIdPais(String idPais) {
+    public void setIdPais(Pais idPais) {
         this.idPais = idPais;
     }
 
@@ -50,14 +56,6 @@ public class Paises {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
-    }
-
-    public String getCodigoTelefono() {
-        return codigoTelefono;
-    }
-
-    public void setCodigoTelefono(String codigoTelefono) {
-        this.codigoTelefono = codigoTelefono;
     }
 
     public EstadoGeneralEnum getEstado() {
@@ -79,21 +77,21 @@ public class Paises {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        Paises paises = (Paises) o;
-        return Objects.equals(idPais, paises.idPais);
+        EstructuraGeografica that = (EstructuraGeografica) o;
+        return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(idPais);
+        return Objects.hashCode(id);
     }
 
     @Override
     public String toString() {
-        return "Paises{" +
-                "idPais='" + idPais + '\'' +
+        return "EstructuraGeografica{" +
+                "id=" + id +
+                ", idPais=" + idPais +
                 ", nombre='" + nombre + '\'' +
-                ", codigoTelefono='" + codigoTelefono + '\'' +
                 ", estado='" + estado + '\'' +
                 ", version=" + version +
                 '}';
