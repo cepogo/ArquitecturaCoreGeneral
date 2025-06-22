@@ -41,7 +41,6 @@ public class Feriados {
     @Column(name = "estado", nullable = false, length = 15)
     private EstadoGeneralEnum estado = EstadoGeneralEnum.ACTIVO;
 
-    @ColumnDefault("0")
     @Column(name = "version", nullable = false, precision = 9)
     private BigDecimal version;
 

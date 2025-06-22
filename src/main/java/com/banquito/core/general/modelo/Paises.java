@@ -26,7 +26,6 @@ public class Paises {
     @Column(name = "estado", length = 15, nullable = false)
     private EstadoGeneralEnum estado;
 
-    @ColumnDefault("0")
     @Column(name = "version", precision = 9, nullable = false)
     private BigDecimal version;
 
