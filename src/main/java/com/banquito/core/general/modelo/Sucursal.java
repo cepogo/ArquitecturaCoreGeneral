@@ -59,20 +59,20 @@ public class Sucursal {
         this.codigo = codigo;
     }
 
+    public LocacionGeografica getIdLocacion() {
+        return idLocacion;
+    }
+
+    public void setIdLocacion(LocacionGeografica idLocacion) {
+        this.idLocacion = idLocacion;
+    }
+
     public EntidadBancaria getIdEntidadBancaria() {
         return idEntidadBancaria;
     }
 
     public void setIdEntidadBancaria(EntidadBancaria idEntidadBancaria) {
         this.idEntidadBancaria = idEntidadBancaria;
-    }
-
-    public LocacionesGeograficas getIdLocacion() {
-        return idLocacion;
-    }
-
-    public void setIdLocacion(LocacionesGeograficas idLocacion) {
-        this.idLocacion = idLocacion;
     }
 
     public String getNombre() {
@@ -182,11 +182,11 @@ public class Sucursal {
 
     @Override
     public String toString() {
-        return "Sucursales [codigo=" + codigo + ", idEntidadBancaria=" + idEntidadBancaria + ", idLocacion="
-                + idLocacion + ", nombre=" + nombre + ", fechaCreacion=" + fechaCreacion + ", correoElectronico="
-                + correoElectronico + ", telefono=" + telefono + ", direccionLinea1=" + direccionLinea1
-                + ", direccionLinea2=" + direccionLinea2 + ", latitud=" + latitud + ", longitud=" + longitud
-                + ", estado=" + estado + ", version=" + version + "]";
+        return "Sucursal [codigo=" + codigo + ", idEntidadBancaria=" + idEntidadBancaria + ", idLocacion=" + idLocacion
+                + ", nombre=" + nombre + ", fechaCreacion=" + fechaCreacion + ", correoElectronico=" + correoElectronico
+                + ", telefono=" + telefono + ", direccionLinea1=" + direccionLinea1 + ", direccionLinea2="
+                + direccionLinea2 + ", latitud=" + latitud + ", longitud=" + longitud + ", estado=" + estado
+                + ", version=" + version + "]";
     }
 
 } 

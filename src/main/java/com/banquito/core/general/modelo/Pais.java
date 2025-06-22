@@ -2,7 +2,6 @@ package com.banquito.core.general.modelo;
 
 import com.banquito.core.general.enums.EstadoGeneralEnum;
 import jakarta.persistence.*;
-import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 import java.util.Objects;
