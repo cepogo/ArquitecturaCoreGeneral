@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "monedas")
-public class Monedas {
+public class Moneda {
     @Id
     @Column(name = "id_moneda", nullable = false, length = 3)
     private String idMoneda;
@@ -90,7 +90,7 @@ public class Monedas {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Monedas other = (Monedas) obj;
+        Moneda other = (Moneda) obj;
         if (idMoneda == null) {
             if (other.idMoneda != null)
                 return false;

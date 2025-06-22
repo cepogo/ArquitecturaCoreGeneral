@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "entidades_bancarias")
-public class EntidadesBancarias {
+public class EntidadBancaria {
     @Id
     @Column(name = "id_entidad_bancaria", nullable = false)
     private Integer id;
@@ -91,7 +91,7 @@ public class EntidadesBancarias {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        EntidadesBancarias other = (EntidadesBancarias) obj;
+        EntidadBancaria other = (EntidadBancaria) obj;
         if (id == null) {
             if (other.id != null)
                 return false;
