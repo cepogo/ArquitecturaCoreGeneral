@@ -25,8 +25,8 @@ public class EstructuraGeografica {
     @Column(name = "estado", length = 15, nullable = false)
     private EstadoGeneralEnum estado = EstadoGeneralEnum.ACTIVO;
 
-    @Column(name = "version", precision = 9, nullable = false)
-    private BigDecimal version;
+    @Column(name = "version", nullable = false)
+    private Long version;
 
     public EstructuraGeografica() {
     }
@@ -67,11 +67,11 @@ public class EstructuraGeografica {
         this.estado = estado;
     }
 
-    public BigDecimal getVersion() {
+    public Long getVersion() {
         return version;
     }
 
-    public void setVersion(BigDecimal version) {
+    public void setVersion(Long version) {
         this.version = version;
     }
 

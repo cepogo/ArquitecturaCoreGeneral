@@ -39,8 +39,8 @@ public class Feriado {
     @Column(name = "estado", nullable = false, length = 15)
     private EstadoGeneralEnum estado = EstadoGeneralEnum.ACTIVO;
 
-    @Column(name = "version", nullable = false, precision = 9)
-    private BigDecimal version;
+    @Column(name = "version", nullable = false)
+    private Long version;
 
     public Feriado() {
     }
@@ -105,11 +105,11 @@ public class Feriado {
         this.estado = estado;
     }
 
-    public BigDecimal getVersion() {
+    public Long getVersion() {
         return version;
     }
 
-    public void setVersion(BigDecimal version) {
+    public void setVersion(Long version) {
         this.version = version;
     }
 

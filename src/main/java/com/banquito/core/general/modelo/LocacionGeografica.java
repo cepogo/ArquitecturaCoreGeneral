@@ -42,8 +42,8 @@ public class LocacionGeografica {
     @Column(name = "estado", length = 15, nullable = false)
     private EstadoLocacionesGeograficasEnum estado;
 
-    @Column(name = "version", precision = 9, nullable = false)
-    private BigDecimal version;
+    @Column(name = "version", nullable = false)
+    private Long version;
 
     public LocacionGeografica() {
     }
@@ -116,11 +116,11 @@ public class LocacionGeografica {
         this.estado = estado;
     }
 
-    public BigDecimal getVersion() {
+    public Long getVersion() {
         return version;
     }
 
-    public void setVersion(BigDecimal version) {
+    public void setVersion(Long version) {
         this.version = version;
     }
 
