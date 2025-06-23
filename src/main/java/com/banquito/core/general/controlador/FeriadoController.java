@@ -1,6 +1,8 @@
 package com.banquito.core.general.controlador;
 
+import com.banquito.core.general.dto.FeriadoCreacionDTO;
 import com.banquito.core.general.dto.FeriadoDTO;
+import com.banquito.core.general.dto.FeriadoUpdateDTO;
 import com.banquito.core.general.servicio.FeriadoServicio;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -24,23 +26,26 @@ public class FeriadoController {
     }
 
     @PostMapping
-    @Operation(summary = "Crear feriado", description = "Crea un nuevo feriado por país o locación geográfica.")
+    @Operation(summary = "Crear feriado", description = "Crea un nuevo feriado. Para feriados nacionales no enviar idLocacion, para locales es obligatorio.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Feriado creado exitosamente"),
-            @ApiResponse(responseCode = "400", description = "Solicitud inválida")
+            @ApiResponse(responseCode = "400", description = "Solicitud inválida"),
+            @ApiResponse(responseCode = "404", description = "País o locación no encontrada")
     })
-    public ResponseEntity<FeriadoDTO> crearFeriado(@Valid @RequestBody FeriadoDTO dto) {
+    public ResponseEntity<FeriadoDTO> crearFeriado(@Valid @RequestBody FeriadoCreacionDTO dto) {
         return ResponseEntity.ok(feriadoServicio.crearFeriado(dto));
     }
 
-    @PutMapping
+    @PutMapping("/{idFeriado}")
     @Operation(summary = "Modificar feriado", description = "Modifica solo la fecha y el nombre de un feriado.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Feriado modificado exitosamente"),
             @ApiResponse(responseCode = "404", description = "Feriado no encontrado")
     })
-    public ResponseEntity<FeriadoDTO> modificarFeriado(@Valid @RequestBody FeriadoDTO dto) {
-        return ResponseEntity.ok(feriadoServicio.modificarFeriado(dto));
+    public ResponseEntity<FeriadoDTO> modificarFeriado(
+            @PathVariable Integer idFeriado,
+            @Valid @RequestBody FeriadoUpdateDTO dto) {
+        return ResponseEntity.ok(feriadoServicio.modificarFeriado(idFeriado, dto));
     }
 
     @DeleteMapping("/{idFeriado}")
@@ -60,5 +65,28 @@ public class FeriadoController {
             @RequestParam int anio,
             @RequestParam Integer idLocacion) {
         return ResponseEntity.ok(feriadoServicio.listarFeriadosActivosPorAnioYLocacion(anio, idLocacion));
+    }
+
+    // Listar todos los feriados (nacionales y locales) de un año
+    @GetMapping
+    @Operation(summary = "Listar todos los feriados de un año", description = "Devuelve todos los feriados (nacionales y locales) activos de un año.")
+    public ResponseEntity<List<FeriadoDTO>> listarFeriadosPorAnio(@RequestParam int anio) {
+        return ResponseEntity.ok(feriadoServicio.listarFeriadosPorAnio(anio));
+    }
+
+    // Listar solo feriados nacionales de un año
+    @GetMapping("/nacionales")
+    @Operation(summary = "Listar feriados nacionales de un año", description = "Devuelve solo los feriados nacionales activos de un año.")
+    public ResponseEntity<List<FeriadoDTO>> listarFeriadosNacionalesPorAnio(@RequestParam int anio) {
+        return ResponseEntity.ok(feriadoServicio.listarFeriadosNacionalesPorAnio(anio));
+    }
+
+    // Listar solo feriados locales de un año, opcionalmente filtrados por locación
+    @GetMapping("/locales")
+    @Operation(summary = "Listar feriados locales de un año", description = "Devuelve solo los feriados locales activos de un año. Puede filtrar por idLocacion.")
+    public ResponseEntity<List<FeriadoDTO>> listarFeriadosLocalesPorAnio(
+            @RequestParam int anio,
+            @RequestParam(required = false) Integer idLocacion) {
+        return ResponseEntity.ok(feriadoServicio.listarFeriadosLocalesPorAnio(anio, idLocacion));
     }
 } 

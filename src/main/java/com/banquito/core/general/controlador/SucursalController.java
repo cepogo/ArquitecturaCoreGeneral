@@ -1,6 +1,8 @@
 package com.banquito.core.general.controlador;
 
 import com.banquito.core.general.dto.SucursalDTO;
+import com.banquito.core.general.dto.SucursalCreacionDTO;
+import com.banquito.core.general.dto.SucursalUpdateDTO;
 import com.banquito.core.general.enums.EstadoSucursalesEnum;
 import com.banquito.core.general.servicio.SucursalServicio;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,7 +32,7 @@ public class SucursalController {
             @ApiResponse(responseCode = "200", description = "Sucursal creada exitosamente"),
             @ApiResponse(responseCode = "400", description = "Solicitud inválida")
     })
-    public ResponseEntity<SucursalDTO> crearSucursal(@Valid @RequestBody SucursalDTO dto) {
+    public ResponseEntity<SucursalDTO> crearSucursal(@Valid @RequestBody SucursalCreacionDTO dto) {
         return ResponseEntity.ok(sucursalServicio.crearSucursal(dto));
     }
 
@@ -40,7 +42,7 @@ public class SucursalController {
             @ApiResponse(responseCode = "200", description = "Sucursal modificada exitosamente"),
             @ApiResponse(responseCode = "404", description = "Sucursal no encontrada")
     })
-    public ResponseEntity<SucursalDTO> modificarSucursal(@Valid @RequestBody SucursalDTO dto) {
+    public ResponseEntity<SucursalDTO> modificarSucursal(@Valid @RequestBody SucursalUpdateDTO dto) {
         return ResponseEntity.ok(sucursalServicio.modificarSucursal(dto));
     }
 

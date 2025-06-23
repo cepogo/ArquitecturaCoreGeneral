@@ -1,6 +1,8 @@
 package com.banquito.core.general.servicio;
 
 import com.banquito.core.general.dto.SucursalDTO;
+import com.banquito.core.general.dto.SucursalCreacionDTO;
+import com.banquito.core.general.dto.SucursalUpdateDTO;
 import com.banquito.core.general.enums.EstadoSucursalesEnum;
 import com.banquito.core.general.excepcion.ActualizarEntidadException;
 import com.banquito.core.general.excepcion.CrearEntidadException;
@@ -50,13 +52,37 @@ public class SucursalServicio {
         }
     }
 
-    // Modificar datos de sucursal (excepto entidad bancaria, fecha creación, estado, versión)
+    // Crear sucursal con DTO de creación
     @Transactional
-    public SucursalDTO modificarSucursal(SucursalDTO dto) {
+    public SucursalDTO crearSucursal(SucursalCreacionDTO dto) {
+        try {
+            Sucursal entity = new Sucursal();
+            entity.setCodigo(dto.getCodigo());
+            entity.setNombre(dto.getNombre());
+            entity.setFechaCreacion(dto.getFechaCreacion());
+            entity.setCorreoElectronico(dto.getCorreoElectronico());
+            entity.setTelefono(dto.getTelefono());
+            entity.setDireccionLinea1(dto.getDireccionLinea1());
+            entity.setDireccionLinea2(dto.getDireccionLinea2());
+            entity.setLatitud(dto.getLatitud());
+            entity.setLongitud(dto.getLongitud());
+            entity.setEstado(EstadoSucursalesEnum.ACTIVO.name());
+            entity.setVersion(1L);
+            // Relaciones
+            entity.setIdEntidadBancaria(entidadBancariaRepositorio.findById(dto.getIdEntidadBancaria()).orElse(null));
+            entity.setIdLocacion(locacionGeograficaRepositorio.findById(dto.getIdLocacion()).orElse(null));
+            return sucursalMapper.toDTO(sucursalRepositorio.save(entity));
+        } catch (Exception e) {
+            throw new CrearEntidadException("Sucursal", "Error al crear la sucursal: " + e.getMessage());
+        }
+    }
+
+    // Modificar datos de sucursal (solo campos permitidos, usando SucursalUpdateDTO)
+    @Transactional
+    public SucursalDTO modificarSucursal(SucursalUpdateDTO dto) {
         Sucursal entity = sucursalRepositorio.findById(dto.getCodigo())
                 .orElseThrow(() -> new EntidadNoEncontradaException("Sucursal no encontrada", 2, "Sucursal"));
         try {
-            // Solo actualiza campos permitidos
             if (dto.getNombre() != null) entity.setNombre(dto.getNombre());
             if (dto.getCorreoElectronico() != null) entity.setCorreoElectronico(dto.getCorreoElectronico());
             if (dto.getTelefono() != null) entity.setTelefono(dto.getTelefono());

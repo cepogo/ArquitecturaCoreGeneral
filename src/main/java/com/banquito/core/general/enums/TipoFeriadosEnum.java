@@ -3,7 +3,7 @@ package com.banquito.core.general.enums;
 public enum TipoFeriadosEnum {
 
     NACIONAL("NACIONAL"),
-    REGIONAL("REGIONAL");
+    LOCAL("LOCAL");
 
     private final String valor;
 
