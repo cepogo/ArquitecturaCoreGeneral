@@ -74,4 +74,14 @@ public class SucursalController {
     public ResponseEntity<List<SucursalDTO>> listarSucursalesActivasPorLocacion(@PathVariable Integer idLocacion) {
         return ResponseEntity.ok(sucursalServicio.listarSucursalesActivasPorLocacion(idLocacion));
     }
+
+    @GetMapping
+    @Operation(summary = "Listar todas las sucursales", description = "Devuelve una lista de todas las sucursales sin importar su estado.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista de sucursales obtenida exitosamente"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
+    public ResponseEntity<List<SucursalDTO>> listarTodasLasSucursales() {
+        return ResponseEntity.ok(sucursalServicio.listarTodasLasSucursales());
+    }
 } 

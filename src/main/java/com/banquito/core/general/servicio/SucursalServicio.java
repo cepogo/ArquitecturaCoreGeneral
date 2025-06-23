@@ -157,4 +157,12 @@ public class SucursalServicio {
         log.info("Se encontraron {} sucursales activas para la locación ID: {}", sucursales.size(), idLocacion);
         return sucursales.stream().map(sucursalMapper::toDTO).collect(Collectors.toList());
     }
+
+    // Listar todas las sucursales
+    public List<SucursalDTO> listarTodasLasSucursales() {
+        log.info("Listando todas las sucursales");
+        List<Sucursal> sucursales = sucursalRepositorio.findAll();
+        log.info("Se encontraron {} sucursales en total", sucursales.size());
+        return sucursales.stream().map(sucursalMapper::toDTO).collect(Collectors.toList());
+    }
 } 
