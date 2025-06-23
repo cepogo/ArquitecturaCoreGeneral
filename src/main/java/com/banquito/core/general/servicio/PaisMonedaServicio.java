@@ -15,14 +15,15 @@ import com.banquito.core.general.mapper.PaisMapper;
 import com.banquito.core.general.modelo.*;
 import com.banquito.core.general.repositorio.*;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class PaisMonedaServicio {
     private final PaisRepositorio paisRepositorio;
     private final MonedaRepositorio monedaRepositorio;
@@ -50,16 +51,21 @@ public class PaisMonedaServicio {
 
     @Transactional
     public PaisDTO crearPais(PaisDTO paisDTO) {
+        log.info("Iniciando creación de país: {}", paisDTO.getNombre());
         if (paisRepositorio.findByNombre(paisDTO.getNombre()).isPresent()) {
+            log.warn("Ya existe un país con el nombre: {}", paisDTO.getNombre());
             throw new CrearEntidadException("Pais", "Ya existe un país con el nombre: " + paisDTO.getNombre());
         }
         Pais pais = paisMapper.toEntity(paisDTO);
         pais.setEstado(EstadoGeneralEnum.ACTIVO);
         pais.setVersion(1L);
-        return paisMapper.toDTO(paisRepositorio.save(pais));
+        PaisDTO result = paisMapper.toDTO(paisRepositorio.save(pais));
+        log.info("País creado exitosamente con ID: {}", result.getIdPais());
+        return result;
     }
 
     public List<PaisDTO> listarPaisesActivos() {
+        log.info("Listando países activos");
         return paisRepositorio.findByEstadoOrderByNombre(EstadoGeneralEnum.ACTIVO)
                 .stream()
                 .map(paisMapper::toDTO)
@@ -68,24 +74,31 @@ public class PaisMonedaServicio {
 
     @Transactional
     public PaisDTO actualizarParcialmentePais(String idPais, PaisUpdateDTO paisUpdateDTO) {
-        Pais pais = paisRepositorio.findById(idPais)
-                .orElseThrow(() -> new EntidadNoEncontradaException("No se encontró el país con ID: " + idPais, 2, "Pais"));
+        log.info("Iniciando actualización de datos del país con ID: {}", idPais);
 
+        Pais pais = paisRepositorio.findById(idPais)
+                .orElseThrow(() -> {
+                    log.error("No se encontró el país con ID: {}", idPais);
+                    return new EntidadNoEncontradaException("No se encontró el país con ID: " + idPais, 2, "Pais");
+                });
         Optional.ofNullable(paisUpdateDTO.getNombre()).ifPresent(pais::setNombre);
         Optional.ofNullable(paisUpdateDTO.getCodigoTelefono()).ifPresent(pais::setCodigoTelefono);
 
         pais.setVersion(pais.getVersion() + 1);
         paisRepositorio.save(pais);
-
+        log.info("País con ID: {} actualizado exitosamente", idPais);
         return paisMapper.toDTO(pais);
     }
 
 
     @Transactional
     public PaisDTO cambiarEstadoPais(String idPais, EstadoGeneralEnum nuevoEstado) {
+        log.info("Cambiando estado del país con ID: {} a {}", idPais, nuevoEstado);
         Pais pais = paisRepositorio.findById(idPais)
-                .orElseThrow(() -> new EntidadNoEncontradaException("No se encontró el país con ID: " + idPais, 2, "Pais"));
-
+                .orElseThrow(() -> {
+                    log.error("No se encontró el país con ID: {}", idPais);
+                    return new EntidadNoEncontradaException("No se encontró el país con ID: " + idPais, 2, "Pais");
+                });
         pais.setEstado(nuevoEstado);
         pais.setVersion(pais.getVersion() + 1);
 
@@ -95,7 +108,9 @@ public class PaisMonedaServicio {
             if (!monedas.isEmpty()) {
                 for (Moneda moneda : monedas) {
                     this.cambiarEstadoMoneda(moneda.getIdMoneda(), EstadoGeneralEnum.INACTIVO);
+                    log.debug("Moneda: {} inactivada", moneda.getIdMoneda());
                 }
+                log.info("Todas las monedas asociadas al país con ID: {} han sido inactivadas", idPais);
             }
 
             List<Feriado> feriados = feriadoRepositorio.findByIdPais_IdPais(idPais);
@@ -105,6 +120,7 @@ public class PaisMonedaServicio {
                     feriado.setVersion(feriado.getVersion()+ 1);
                     feriadoRepositorio.save(feriado);
                 }
+                log.info("Todos los feriados asociados al país con ID: {} han sido inactivados", idPais);
             }
 
             List<EstructuraGeografica> estructuras = estructuraGeograficaRepositorio.findById_IdPais(idPais);
@@ -114,7 +130,9 @@ public class PaisMonedaServicio {
                     estructura.setEstado(EstadoGeneralEnum.INACTIVO);
                     estructura.setVersion(estructura.getVersion() + 1);
                     estructuraGeograficaRepositorio.save(estructura);
+                    log.debug("Estructura geográfica: {} inactivada", estructura.getNombre());
                 }
+                log.info("Todas las estructuras geográficas asociadas al país con ID: {} han sido inactivadas", idPais);
             }
 
             List<LocacionGeografica> locaciones = locacionGeograficaRepositorio.findByEstructuraGeografica_Id_IdPais(idPais);
@@ -124,6 +142,7 @@ public class PaisMonedaServicio {
                     locacion.setVersion(locacion.getVersion() + 1);
                     locacionGeograficaRepositorio.save(locacion);
                 }
+                log.info("Todas las locaciones geográficas asociadas al país con ID: {} han sido inactivadas", idPais);
 
                 List<Integer> idsLocaciones = locaciones.stream().map(LocacionGeografica::getIdLocacion).collect(Collectors.toList());
                 List<Sucursal> sucursales = sucursalRepositorio.findByIdLocacion_IdLocacionIn(idsLocaciones);
@@ -132,33 +151,43 @@ public class PaisMonedaServicio {
                         sucursal.setEstado(EstadoSucursalesEnum.INACTIVO.getValor());
                         sucursal.setVersion(sucursal.getVersion() + 1);
                         sucursalRepositorio.save(sucursal);
+                        log.debug("Sucursal: {} inactivada", sucursal.getNombre());
                     }
+                    log.info("Todas las sucursales asociadas a las locaciones geográficas del país con ID: {} han sido inactivadas", idPais);
                 }
             }
         }
+        log.info("Estado del país actualizado a {} para el país con ID: {}", nuevoEstado, idPais);
         return paisMapper.toDTO(paisRepositorio.save(pais));
     }
 
     @Transactional
     public MonedaDTO crearMonedaPorPais(String idPais, MonedaDTO monedaDTO) {
+        log.info("Iniciando creación de moneda para el país con ID: {}", idPais);
         Pais pais = paisRepositorio.findById(idPais)
                 .orElseThrow(() -> new EntidadNoEncontradaException("No se encontró el país con ID: " + idPais, 2, "Pais"));
 
         if (pais.getEstado().equals(EstadoGeneralEnum.INACTIVO)) {
+            log.warn("Se intentó crear una moneda para un país inactivo: {}", pais.getNombre());
             throw new CrearEntidadException("Moneda", "El país " + pais.getNombre() + " está inactivo.");
         }
-        if (monedaRepositorio.findByNombre(monedaDTO.getNombre()).isPresent()) {
-            throw new CrearEntidadException("Moneda", "Ya existe una moneda con el nombre: " + monedaDTO.getNombre());
+        if (monedaRepositorio.findById(monedaDTO.getIdMoneda()).isPresent()) {
+            log.warn("Se intentó crear una moneda con un id existente: {}", monedaDTO.getIdMoneda());
+            throw new CrearEntidadException("Moneda", "Ya existe una moneda con el id: " + monedaDTO.getIdMoneda());
         }
 
         Moneda moneda = monedaMapper.toEntity(monedaDTO);
         moneda.setIdPais(pais);
         moneda.setEstado(EstadoGeneralEnum.ACTIVO);
         moneda.setVersion(1L);
+
+        log.info("Moneda creada exitosamente con ID: {}", moneda.getIdMoneda());
+
         return monedaMapper.toDTO(monedaRepositorio.save(moneda));
     }
 
     public List<MonedaDTO> listarMonedasActivas() {
+        log.info("Listando monedas activas.");
         return monedaRepositorio.findByEstado(EstadoGeneralEnum.ACTIVO)
                 .stream()
                 .map(monedaMapper::toDTO)
@@ -167,6 +196,8 @@ public class PaisMonedaServicio {
 
     @Transactional
     public MonedaDTO actualizarParcialmenteMoneda(String idMoneda, MonedaUpdateDTO monedaDTO) {
+        log.info("Iniciando actualización parcial de la moneda con ID: {}", idMoneda);
+
         Moneda moneda = monedaRepositorio.findById(idMoneda)
                 .orElseThrow(() -> new EntidadNoEncontradaException("No se encontró la moneda con ID: " + idMoneda, 2, "Moneda"));
 
@@ -176,12 +207,16 @@ public class PaisMonedaServicio {
         moneda.setVersion(moneda.getVersion() + 1);
         monedaRepositorio.save(moneda);
 
+        log.info("Moneda con ID: {} actualizada exitosamente", idMoneda);
+
         return monedaMapper.toDTO(moneda);
     }
 
 
     @Transactional
     public MonedaDTO cambiarEstadoMoneda(String idMoneda, EstadoGeneralEnum nuevoEstado) {
+        log.info("Cambiando estado de la moneda con ID: {} a {}", idMoneda, nuevoEstado);
+
         Moneda moneda = monedaRepositorio.findById(idMoneda)
                 .orElseThrow(() -> new EntidadNoEncontradaException("No se encontró la moneda con ID: " + idMoneda, 2, "Moneda"));
 
@@ -189,6 +224,7 @@ public class PaisMonedaServicio {
             Pais paisDeLaMoneda = paisRepositorio.findById(moneda.getIdPais().getIdPais())
                     .orElseThrow(() -> new EntidadNoEncontradaException("No se encontró el país asociado a la moneda", 2, "Pais"));
             if (paisDeLaMoneda.getEstado() == EstadoGeneralEnum.INACTIVO) {
+                log.warn("No se puede activar la moneda porque el país '{}' está inactivo.", paisDeLaMoneda.getNombre());
                 throw new ActualizarEntidadException("Moneda", "No se puede activar la moneda porque el país '" + paisDeLaMoneda.getNombre() + "' está inactivo.");
             }
         }
@@ -202,9 +238,11 @@ public class PaisMonedaServicio {
                     relacion.setEstado(EstadoGeneralEnum.INACTIVO);
                     relacion.setVersion(relacion.getVersion() + 1);
                     entidadBancariaMonedaRepositorio.save(relacion);
+                    log.debug("Moneda: {} inactivada para la entidad: {}", relacion.getIdMoneda(),relacion.getIdEntidadBancaria().getNombre());
                 }
             }
         }
+        log.info("Estado de la moneda actualizado a {} para la moneda con ID: {}", nuevoEstado, idMoneda);
         return monedaMapper.toDTO(monedaRepositorio.save(moneda));
     }
 }
