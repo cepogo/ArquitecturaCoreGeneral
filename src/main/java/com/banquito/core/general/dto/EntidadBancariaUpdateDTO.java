@@ -16,6 +16,4 @@ public class EntidadBancariaUpdateDTO {
     @Size(max = 20, message = "El código internacional debe tener máximo 20 caracteres")
     private String codigoInternacional;
 
-    @Size(max = 15, message = "El estado debe tener máximo 15 caracteres")
-    private EstadoGeneralEnum estado;
 }

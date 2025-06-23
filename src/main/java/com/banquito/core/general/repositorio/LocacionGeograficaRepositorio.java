@@ -20,4 +20,7 @@ public interface LocacionGeograficaRepositorio extends JpaRepository<LocacionGeo
     // Listar cantones de una provincia específica
     List<LocacionGeografica> findByIdLocacionPadre_NombreAndEstructuraGeografica_Id_IdPaisAndEstructuraGeografica_Id_CodigoNivelAndEstado(
         String nombreProvincia, String idPais, java.math.BigDecimal codigoNivel, com.banquito.core.general.enums.EstadoLocacionesGeograficasEnum estado);
+
+    List<LocacionGeografica> findByEstructuraGeografica_Id_IdPais(String idPais);
+
 } 

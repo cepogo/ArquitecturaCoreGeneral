@@ -5,6 +5,7 @@ import com.banquito.core.general.dto.EntidadBancariaMonedaDTO;
 import com.banquito.core.general.dto.EntidadBancariaUpdateDTO;
 import com.banquito.core.general.dto.MonedaDTO;
 import com.banquito.core.general.enums.EstadoGeneralEnum;
+import com.banquito.core.general.enums.EstadoSucursalesEnum;
 import com.banquito.core.general.excepcion.ActualizarEntidadException;
 import com.banquito.core.general.excepcion.CrearEntidadException;
 import com.banquito.core.general.excepcion.EntidadNoEncontradaException;
@@ -14,9 +15,11 @@ import com.banquito.core.general.mapper.MonedaMapper;
 import com.banquito.core.general.modelo.EntidadBancaria;
 import com.banquito.core.general.modelo.EntidadBancariaMoneda;
 import com.banquito.core.general.modelo.Moneda;
+import com.banquito.core.general.modelo.Sucursal;
 import com.banquito.core.general.repositorio.EntidadBancariaMonedaRepositorio;
 import com.banquito.core.general.repositorio.EntidadBancariaRepositorio;
 import com.banquito.core.general.repositorio.MonedaRepositorio;
+import com.banquito.core.general.repositorio.SucursalRepositorio;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -30,30 +33,21 @@ public class EntidadBancariaMonedaServicio {
     private final EntidadBancariaRepositorio entidadBancariaRepositorio;
     private final EntidadBancariaMonedaRepositorio entidadBancariaMonedaRepositorio;
     private final MonedaRepositorio monedaRepositorio;
+    private final SucursalRepositorio sucursalRepositorio;
     private final EntidadBancariaMapper entidadBancariaMapper;
     private final EntidadBancariaMonedaMapper entidadBancariaMonedaMapper;
     private final MonedaMapper monedaMapper;
 
-    public EntidadBancariaMonedaServicio(EntidadBancariaRepositorio entidadBancariaRepositorio, EntidadBancariaMonedaRepositorio entidadBancariaMonedaRepositorio, MonedaRepositorio monedaRepositorio, EntidadBancariaMapper entidadBancariaMapper, EntidadBancariaMonedaMapper entidadBancariaMonedaMapper, MonedaMapper monedaMapper) {
+    public EntidadBancariaMonedaServicio(EntidadBancariaRepositorio entidadBancariaRepositorio, EntidadBancariaMonedaRepositorio entidadBancariaMonedaRepositorio, MonedaRepositorio monedaRepositorio, SucursalRepositorio sucursalRepositorio, EntidadBancariaMapper entidadBancariaMapper, EntidadBancariaMonedaMapper entidadBancariaMonedaMapper, MonedaMapper monedaMapper) {
         this.entidadBancariaRepositorio = entidadBancariaRepositorio;
         this.entidadBancariaMonedaRepositorio = entidadBancariaMonedaRepositorio;
         this.monedaRepositorio = monedaRepositorio;
+        this.sucursalRepositorio = sucursalRepositorio;
         this.entidadBancariaMapper = entidadBancariaMapper;
         this.entidadBancariaMonedaMapper = entidadBancariaMonedaMapper;
         this.monedaMapper = monedaMapper;
     }
 
-    @Transactional
-    public EntidadBancariaDTO modificarEntidadBancaria(Integer id, EntidadBancariaDTO entidadBancariaDTO) {
-        EntidadBancaria entidad = entidadBancariaRepositorio.findById(id)
-                .orElseThrow(() -> new EntidadNoEncontradaException("No se encontró la entidad bancaria con ID: " + id, 2, "EntidadBancaria"));
-
-        entidad.setNombre(entidadBancariaDTO.getNombre());
-        entidad.setCodigoLocal(entidadBancariaDTO.getCodigoLocal());
-        entidad.setCodigoInternacional(entidadBancariaDTO.getCodigoInternacional());
-        entidad.setVersion(entidad.getVersion().add(BigDecimal.ONE));
-        return entidadBancariaMapper.toDTO(entidad);
-    }
 
     @Transactional
     public EntidadBancariaDTO modificarParcialmenteEntidadBancaria(Integer id, EntidadBancariaUpdateDTO entidadBancariaDTO) {
@@ -63,32 +57,41 @@ public class EntidadBancariaMonedaServicio {
         Optional.ofNullable(entidadBancariaDTO.getNombre()).ifPresent(entidad::setNombre);
         Optional.ofNullable(entidadBancariaDTO.getCodigoLocal()).ifPresent(entidad::setCodigoLocal);
         Optional.ofNullable(entidadBancariaDTO.getCodigoInternacional()).ifPresent(entidad::setCodigoInternacional);
-        Optional.ofNullable(entidadBancariaDTO.getEstado()).ifPresent(entidad::setEstado);
 
-        entidad.setVersion(entidad.getVersion().add(BigDecimal.ONE));
+        entidad.setVersion(entidad.getVersion() + 1);
         entidadBancariaRepositorio.save(entidad);
 
         return entidadBancariaMapper.toDTO(entidad);
     }
 
     @Transactional
-    public void eliminarEntidadBancaria(Integer id) {
+    public EntidadBancariaDTO cambiarEstadoEntidadBancaria(Integer id, EstadoGeneralEnum nuevoEstado) {
         EntidadBancaria entidad = entidadBancariaRepositorio.findById(id)
                 .orElseThrow(() -> new EntidadNoEncontradaException("No se encontró la entidad bancaria con ID: " + id, 2, "EntidadBancaria"));
 
-        if (entidad.getEstado().equals(EstadoGeneralEnum.INACTIVO)) {
-            throw new ActualizarEntidadException("EntidadBancaria", "La entidad ya se encuentra inactiva.");
-        }
-        entidad.setEstado(EstadoGeneralEnum.INACTIVO);
-        entidad.setVersion(entidad.getVersion().add(BigDecimal.ONE));
-        entidadBancariaRepositorio.save(entidad);
+        entidad.setEstado(nuevoEstado);
+        entidad.setVersion(entidad.getVersion() + 1);
 
-        List<EntidadBancariaMoneda> monedasAsociadas = entidadBancariaMonedaRepositorio.findByIdEntidadBancaria(entidad);
-        for (EntidadBancariaMoneda ebm : monedasAsociadas) {
-            ebm.setEstado(EstadoGeneralEnum.INACTIVO);
-            ebm.setVersion(ebm.getVersion().add(BigDecimal.ONE));
-            entidadBancariaMonedaRepositorio.save(ebm);
+        if (nuevoEstado == EstadoGeneralEnum.INACTIVO) {
+            List<EntidadBancariaMoneda> monedasAsociadas = entidadBancariaMonedaRepositorio.findByIdEntidadBancaria(entidad);
+            if (!monedasAsociadas.isEmpty()) {
+                for (EntidadBancariaMoneda ebm : monedasAsociadas) {
+                    ebm.setEstado(EstadoGeneralEnum.INACTIVO);
+                    ebm.setVersion(ebm.getVersion() + 1);
+                    entidadBancariaMonedaRepositorio.save(ebm);
+                }
+            }
+
+            List<Sucursal> sucursalesAsociadas = sucursalRepositorio.findByIdEntidadBancaria(entidad);
+            if (!sucursalesAsociadas.isEmpty()) {
+                for (Sucursal sucursal : sucursalesAsociadas) {
+                    sucursal.setEstado(EstadoSucursalesEnum.INACTIVO.getValor());
+                    sucursal.setVersion(sucursal.getVersion() + 1);
+                    sucursalRepositorio.save(sucursal);
+                }
+            }
         }
+        return entidadBancariaMapper.toDTO(entidadBancariaRepositorio.save(entidad));
     }
 
     public EntidadBancariaDTO obtenerPorId(Integer id) {
@@ -117,11 +120,16 @@ public class EntidadBancariaMonedaServicio {
             throw new CrearEntidadException("EntidadBancariaMoneda", "La moneda no está activa.");
         }
 
+        Optional<EntidadBancariaMoneda> relacionExistente = entidadBancariaMonedaRepositorio.findByIdEntidadBancariaAndIdMoneda(entidad, moneda);
+        if (relacionExistente.isPresent()) {
+            throw new CrearEntidadException("EntidadBancariaMoneda", "La relación entre la entidad '" + entidad.getNombre() + "' y la moneda '" + moneda.getNombre() + "' ya existe.");
+        }
+
         EntidadBancariaMoneda nuevaRelacion = new EntidadBancariaMoneda();
         nuevaRelacion.setIdEntidadBancaria(entidad);
-        nuevaRelacion.setIdMoneda(idMoneda);
+        nuevaRelacion.setIdMoneda(moneda);
         nuevaRelacion.setEstado(EstadoGeneralEnum.ACTIVO);
-        nuevaRelacion.setVersion(BigDecimal.ONE);
+        nuevaRelacion.setVersion(1L);
         return entidadBancariaMonedaMapper.toDTO(entidadBancariaMonedaRepositorio.save(nuevaRelacion));
     }
 
@@ -129,8 +137,19 @@ public class EntidadBancariaMonedaServicio {
     public EntidadBancariaMonedaDTO cambiarEstadoMonedaDeEntidad(Integer idRelacion, EstadoGeneralEnum nuevoEstado) {
         EntidadBancariaMoneda relacion = entidadBancariaMonedaRepositorio.findById(idRelacion)
                 .orElseThrow(() -> new EntidadNoEncontradaException("No se encontró la relación con ID: " + idRelacion, 2, "EntidadBancariaMoneda"));
+
+        if (nuevoEstado.equals(EstadoGeneralEnum.ACTIVO)) {
+            if (!relacion.getIdEntidadBancaria().getEstado().equals(EstadoGeneralEnum.ACTIVO)) {
+                throw new ActualizarEntidadException("EntidadBancariaMoneda", "No se puede activar la relación porque la entidad bancaria está inactiva.");
+            }
+            Moneda moneda = monedaRepositorio.findById(relacion.getIdMoneda().getIdMoneda())
+                    .orElseThrow(() -> new EntidadNoEncontradaException("Moneda no encontrada", 2, "Moneda"));
+            if (!moneda.getEstado().equals(EstadoGeneralEnum.ACTIVO)) {
+                throw new ActualizarEntidadException("EntidadBancariaMoneda", "No se puede activar la relación porque la moneda está inactiva.");
+            }
+        }
         relacion.setEstado(nuevoEstado);
-        relacion.setVersion(relacion.getVersion().add(BigDecimal.ONE));
+        relacion.setVersion(relacion.getVersion() + 1);
         return entidadBancariaMonedaMapper.toDTO(entidadBancariaMonedaRepositorio.save(relacion));
     }
 
@@ -141,7 +160,7 @@ public class EntidadBancariaMonedaServicio {
         List<EntidadBancariaMoneda> relacionesActivas = entidadBancariaMonedaRepositorio.findByIdEntidadBancariaAndEstado(entidad, EstadoGeneralEnum.ACTIVO);
 
         List<String> idsMonedas = relacionesActivas.stream()
-                .map(EntidadBancariaMoneda::getIdMoneda)
+                .map(rel -> rel.getIdMoneda().getIdMoneda())
                 .collect(Collectors.toList());
 
         return monedaRepositorio.findAllById(idsMonedas)

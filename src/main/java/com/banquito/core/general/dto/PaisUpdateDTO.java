@@ -14,6 +14,4 @@ public class PaisUpdateDTO {
     @Size(max = 4, message = "El código de teléfono debe tener máximo 4 caracteres")
     private String codigoTelefono;
 
-    @Size(max = 15, message = "El estado debe tener máximo 15 caracteres")
-    private EstadoGeneralEnum estado;
 }

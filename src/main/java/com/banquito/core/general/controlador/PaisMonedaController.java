@@ -1,8 +1,10 @@
 package com.banquito.core.general.controlador;
 
 import com.banquito.core.general.dto.MonedaDTO;
+import com.banquito.core.general.dto.MonedaUpdateDTO;
 import com.banquito.core.general.dto.PaisDTO;
 import com.banquito.core.general.dto.PaisUpdateDTO;
+import com.banquito.core.general.enums.EstadoGeneralEnum;
 import com.banquito.core.general.servicio.PaisMonedaServicio;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -51,15 +53,14 @@ public class PaisMonedaController {
         return ResponseEntity.ok(paisMonedaServicio.actualizarParcialmentePais(idPais, paisUpdateDTO));
     }
 
-    @DeleteMapping("/pais/{idPais}")
-    @Operation(summary = "Eliminación lógica de un país", description = "Cambia el estado de un país a INACTIVO. También inactiva todas las monedas asociadas a ese país.")
+    @PatchMapping("/paises/{idPais}/estado")
+    @Operation(summary = "Cambiar estado de un país", description = "Cambia el estado de un país. Si se inactiva, también se inactivan sus monedas, feriados y relaciones asociadas.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "País eliminado lógicamente"),
+            @ApiResponse(responseCode = "200", description = "Estado del país cambiado exitosamente"),
             @ApiResponse(responseCode = "404", description = "País no encontrado")
     })
-    public ResponseEntity<Void> eliminarPais(@PathVariable String idPais) {
-        paisMonedaServicio.eliminarPais(idPais);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<PaisDTO> cambiarEstadoPais(@PathVariable String idPais, @RequestParam EstadoGeneralEnum nuevoEstado) {
+        return ResponseEntity.ok(paisMonedaServicio.cambiarEstadoPais(idPais, nuevoEstado));
     }
 
     @PostMapping("/pais/{idPais}/monedas")
@@ -85,19 +86,18 @@ public class PaisMonedaController {
             @ApiResponse(responseCode = "200", description = "Moneda actualizada exitosamente"),
             @ApiResponse(responseCode = "404", description = "Moneda no encontrada")
     })
-    public ResponseEntity<MonedaDTO> actualizarParcialmenteMoneda(@PathVariable String idMoneda, @RequestBody MonedaDTO monedaDTO) {
+    public ResponseEntity<MonedaDTO> actualizarParcialmenteMoneda(@PathVariable String idMoneda, @RequestBody MonedaUpdateDTO monedaDTO) {
         return ResponseEntity.ok(paisMonedaServicio.actualizarParcialmenteMoneda(idMoneda, monedaDTO));
     }
 
-    @DeleteMapping("/monedas/{idMoneda}")
-    @Operation(summary = "Eliminación lógica de una moneda", description = "Cambia el estado de una moneda a INACTIVO. También inactiva las relaciones en entidad_bancaria_moneda.")
+    @PatchMapping("/monedas/{idMoneda}/estado")
+    @Operation(summary = "Cambiar estado de una moneda", description = "Cambia el estado de una moneda. Si se inactiva, también se inactivan sus relaciones con entidades bancarias.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Moneda eliminada lógicamente"),
+            @ApiResponse(responseCode = "200", description = "Estado de la moneda cambiado exitosamente"),
             @ApiResponse(responseCode = "404", description = "Moneda no encontrada")
     })
-    public ResponseEntity<Void> eliminarMoneda(@PathVariable String idMoneda) {
-        paisMonedaServicio.eliminarMoneda(idMoneda);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<MonedaDTO> cambiarEstadoMoneda(@PathVariable String idMoneda, @RequestParam EstadoGeneralEnum nuevoEstado) {
+        return ResponseEntity.ok(paisMonedaServicio.cambiarEstadoMoneda(idMoneda, nuevoEstado));
     }
 }
 

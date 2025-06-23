@@ -31,7 +31,7 @@ public class EntidadBancaria {
     private EstadoGeneralEnum estado;
 
     @Column(name = "version", nullable = false, precision = 9)
-    private BigDecimal version;
+    private Long version;
 
     public EntidadBancaria() {
     }

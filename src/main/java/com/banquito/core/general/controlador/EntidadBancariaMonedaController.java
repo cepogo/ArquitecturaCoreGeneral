@@ -47,15 +47,14 @@ public class EntidadBancariaMonedaController {
         return ResponseEntity.ok(servicio.modificarParcialmenteEntidadBancaria(id, dto));
     }
 
-    @DeleteMapping("/{id}")
-    @Operation(summary = "Eliminación lógica de entidad bancaria", description = "Inactiva una entidad bancaria y todas sus relaciones con monedas.")
+    @PatchMapping("/{id}/estado")
+    @Operation(summary = "Cambiar estado de entidad bancaria", description = "Inactiva una entidad bancaria y todas sus relaciones con monedas.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Entidad inactivada exitosamente"),
+            @ApiResponse(responseCode = "200", description = "Estado de la entidad cambiado exitosamente"),
             @ApiResponse(responseCode = "404", description = "Entidad no encontrada")
     })
-    public ResponseEntity<Void> eliminarEntidadBancaria(@PathVariable Integer id) {
-        servicio.eliminarEntidadBancaria(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<EntidadBancariaDTO> cambiarEstadoEntidadBancaria(@PathVariable Integer id, @RequestParam EstadoGeneralEnum nuevoEstado) {
+        return ResponseEntity.ok(servicio.cambiarEstadoEntidadBancaria(id, nuevoEstado));
     }
 
     @GetMapping("/activa/primera")

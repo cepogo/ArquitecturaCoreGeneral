@@ -17,8 +17,9 @@ public class Moneda {
     @Column(name = "id_moneda", nullable = false, length = 3)
     private String idMoneda;
 
-    @Column(name = "id_pais", length = 2)
-    private String idPais;
+    @ManyToOne
+    @JoinColumn(name = "id_pais", referencedColumnName = "id_pais", nullable = false)
+    private Pais idPais;
 
     @Column(name = "nombre", nullable = false, length = 50)
     private String nombre;
@@ -31,7 +32,7 @@ public class Moneda {
     private EstadoGeneralEnum estado;
 
     @Column(name = "version", nullable = false, precision = 9)
-    private BigDecimal version;
+    private Long version;
 
     @Override
     public int hashCode() {

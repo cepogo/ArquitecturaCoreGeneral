@@ -12,5 +12,5 @@ import java.util.Optional;
 public interface MonedaRepositorio extends JpaRepository<Moneda, String> {
     Optional<Moneda> findByNombre(String nombre);
     List<Moneda> findByEstado(EstadoGeneralEnum estado);
-    List<Moneda> findByIdPais(String idPais);
+    List<Moneda> findByIdPais_IdPais(String idPais);
 }

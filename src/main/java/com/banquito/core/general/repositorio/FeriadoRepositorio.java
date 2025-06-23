@@ -3,6 +3,7 @@ package com.banquito.core.general.repositorio;
 import com.banquito.core.general.enums.EstadoGeneralEnum;
 import com.banquito.core.general.enums.TipoFeriadosEnum;
 import com.banquito.core.general.modelo.Feriado;
+import com.banquito.core.general.modelo.Moneda;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.Date;
@@ -21,4 +22,6 @@ public interface FeriadoRepositorio extends JpaRepository<Feriado, Integer> {
 
     List<Feriado> findByEstadoAndFechaBetweenAndTipoAndIdLocacion_IdLocacion(
         EstadoGeneralEnum estado, Date fechaInicio, Date fechaFin, TipoFeriadosEnum tipo, Integer idLocacion);
+
+    List<Feriado> findByIdPais_IdPais(String idPais);
 } 

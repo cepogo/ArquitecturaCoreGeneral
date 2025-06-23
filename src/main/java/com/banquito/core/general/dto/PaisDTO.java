@@ -25,5 +25,5 @@ public class PaisDTO {
     @NotNull(message = "El estado no puede ser nulo")
     private EstadoGeneralEnum estado;
 
-    private BigDecimal version;
+    private Long version;
 }

@@ -30,7 +30,7 @@ public class Pais {
     private EstadoGeneralEnum estado;
 
     @Column(name = "version", precision = 9, nullable = false)
-    private BigDecimal version;
+    private Long version;
 
     public Pais() {
     }

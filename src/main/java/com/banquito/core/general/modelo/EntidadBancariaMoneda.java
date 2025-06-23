@@ -22,15 +22,16 @@ public class EntidadBancariaMoneda {
     @JoinColumn(name = "id_entidad_bancaria", referencedColumnName = "id_entidad_bancaria")
     private EntidadBancaria idEntidadBancaria;
 
-    @Column(name = "id_moneda", nullable = false, length = 3)
-    private String idMoneda;
+    @ManyToOne
+    @JoinColumn(name = "id_moneda", referencedColumnName = "id_moneda")
+    private Moneda idMoneda;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false, length = 15)
     private EstadoGeneralEnum estado;
 
     @Column(name = "version", nullable = false, precision = 9)
-    private BigDecimal version;
+    private Long version;
 
     public EntidadBancariaMoneda() {
     }

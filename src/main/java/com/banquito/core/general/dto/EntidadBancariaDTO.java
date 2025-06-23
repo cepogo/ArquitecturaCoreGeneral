@@ -25,8 +25,7 @@ public class EntidadBancariaDTO {
     private String codigoInternacional;
 
     @NotNull(message = "El estado no puede ser nulo")
-    @Size(max = 15, message = "El estado debe tener máximo 15 caracteres")
     private EstadoGeneralEnum estado;
 
-    private BigDecimal version;
+    private Long version;
 }
