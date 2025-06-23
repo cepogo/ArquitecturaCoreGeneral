@@ -1,9 +1,6 @@
 package com.banquito.core.general.controlador;
 
-import com.banquito.core.general.dto.MonedaDTO;
-import com.banquito.core.general.dto.MonedaUpdateDTO;
-import com.banquito.core.general.dto.PaisDTO;
-import com.banquito.core.general.dto.PaisUpdateDTO;
+import com.banquito.core.general.dto.*;
 import com.banquito.core.general.enums.EstadoGeneralEnum;
 import com.banquito.core.general.servicio.PaisMonedaServicio;
 import io.swagger.v3.oas.annotations.Operation;
@@ -70,7 +67,7 @@ public class PaisMonedaController {
             @ApiResponse(responseCode = "400", description = "Solicitud inválida, país inactivo o nombre de moneda duplicado"),
             @ApiResponse(responseCode = "404", description = "País no encontrado")
     })
-    public ResponseEntity<MonedaDTO> crearMonedaPorPais(@PathVariable String idPais, @Valid @RequestBody MonedaDTO monedaDTO) {
+    public ResponseEntity<MonedaDTO> crearMonedaPorPais(@PathVariable String idPais, @Valid @RequestBody MonedaCreateDTO monedaDTO) {
         return ResponseEntity.ok(paisMonedaServicio.crearMonedaPorPais(idPais, monedaDTO));
     }
 

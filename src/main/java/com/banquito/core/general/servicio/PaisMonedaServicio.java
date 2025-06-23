@@ -1,9 +1,6 @@
 package com.banquito.core.general.servicio;
 
-import com.banquito.core.general.dto.MonedaDTO;
-import com.banquito.core.general.dto.MonedaUpdateDTO;
-import com.banquito.core.general.dto.PaisDTO;
-import com.banquito.core.general.dto.PaisUpdateDTO;
+import com.banquito.core.general.dto.*;
 import com.banquito.core.general.enums.EstadoGeneralEnum;
 import com.banquito.core.general.enums.EstadoLocacionesGeograficasEnum;
 import com.banquito.core.general.enums.EstadoSucursalesEnum;
@@ -162,7 +159,7 @@ public class PaisMonedaServicio {
     }
 
     @Transactional
-    public MonedaDTO crearMonedaPorPais(String idPais, MonedaDTO monedaDTO) {
+    public MonedaDTO crearMonedaPorPais(String idPais, MonedaCreateDTO monedaDTO) {
         log.info("Iniciando creación de moneda para el país con ID: {}", idPais);
         Pais pais = paisRepositorio.findById(idPais)
                 .orElseThrow(() -> new EntidadNoEncontradaException("No se encontró el país con ID: " + idPais, 2, "Pais"));
@@ -176,7 +173,7 @@ public class PaisMonedaServicio {
             throw new CrearEntidadException("Moneda", "Ya existe una moneda con el id: " + monedaDTO.getIdMoneda());
         }
 
-        Moneda moneda = monedaMapper.toEntity(monedaDTO);
+        Moneda moneda = monedaMapper.toCreateEntity(monedaDTO);
         moneda.setIdPais(pais);
         moneda.setEstado(EstadoGeneralEnum.ACTIVO);
         moneda.setVersion(1L);

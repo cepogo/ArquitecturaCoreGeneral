@@ -1,5 +1,6 @@
 package com.banquito.core.general.mapper;
 
+import com.banquito.core.general.dto.MonedaCreateDTO;
 import com.banquito.core.general.dto.MonedaDTO;
 import com.banquito.core.general.modelo.Moneda;
 import com.banquito.core.general.modelo.Pais;
@@ -10,6 +11,9 @@ import org.mapstruct.MappingConstants;
 public interface MonedaMapper {
     MonedaDTO toDTO(Moneda moneda);
     Moneda toEntity(MonedaDTO monedaDTO);
+
+    MonedaCreateDTO toCreateDTO(Moneda moneda);
+    Moneda toCreateEntity(MonedaCreateDTO monedaDTO);
 
     default String map(Pais value) {
         return value != null ? value.getIdPais() : null;
