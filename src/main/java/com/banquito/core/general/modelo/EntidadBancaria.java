@@ -7,17 +7,15 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 
-
-
-@Setter
-@Getter
 @Entity
+@Getter
+@Setter
 @Table(name = "entidades_bancarias")
 public class EntidadBancaria {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_entidad_bancaria", nullable = false)
-    private Integer id;
+    private Integer idEntidadBancaria;
 
     @Column(name = "codigo_local", nullable = false, length = 6)
     private String codigoLocal;
@@ -35,11 +33,18 @@ public class EntidadBancaria {
     @Column(name = "version", nullable = false, precision = 9)
     private BigDecimal version;
 
+    public EntidadBancaria() {
+    }
+
+    public EntidadBancaria(Integer idEntidadBancaria) {
+        this.idEntidadBancaria = idEntidadBancaria;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        result = prime * result + ((idEntidadBancaria == null) ? 0 : idEntidadBancaria.hashCode());
         return result;
     }
 
@@ -52,18 +57,19 @@ public class EntidadBancaria {
         if (getClass() != obj.getClass())
             return false;
         EntidadBancaria other = (EntidadBancaria) obj;
-        if (id == null) {
-            if (other.id != null)
+        if (idEntidadBancaria == null) {
+            if (other.idEntidadBancaria != null)
                 return false;
-        } else if (!id.equals(other.id))
+        } else if (!idEntidadBancaria.equals(other.idEntidadBancaria))
             return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return "EntidadesBancarias [id=" + id + ", codigoLocal=" + codigoLocal + ", nombre=" + nombre
-                + ", codigoInternacional=" + codigoInternacional + ", estado=" + estado + ", version=" + version + "]";
+        return "EntidadBancaria [idEntidadBancaria=" + idEntidadBancaria + ", codigoLocal=" + codigoLocal + ", nombre="
+                + nombre + ", codigoInternacional=" + codigoInternacional + ", estado=" + estado + ", version="
+                + version + "]";
     }
 
 }

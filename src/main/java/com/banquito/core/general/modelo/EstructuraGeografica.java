@@ -2,11 +2,14 @@ package com.banquito.core.general.modelo;
 
 import com.banquito.core.general.enums.EstadoGeneralEnum;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.util.Objects;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "estructuras_geograficas")
 public class EstructuraGeografica {
 
@@ -35,66 +38,35 @@ public class EstructuraGeografica {
         this.id = id;
     }
 
-    public EstructuraGeograficaId getId() {
-        return id;
-    }
-
-    public void setId(EstructuraGeograficaId id) {
-        this.id = id;
-    }
-
-    public Pais getIdPais() {
-        return idPais;
-    }
-
-    public void setIdPais(Pais idPais) {
-        this.idPais = idPais;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public EstadoGeneralEnum getEstado() {
-        return estado;
-    }
-
-    public void setEstado(EstadoGeneralEnum estado) {
-        this.estado = estado;
-    }
-
-    public Long getVersion() {
-        return version;
-    }
-
-    public void setVersion(Long version) {
-        this.version = version;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        EstructuraGeografica that = (EstructuraGeografica) o;
-        return Objects.equals(id, that.id);
-    }
-
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        EstructuraGeografica other = (EstructuraGeografica) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        return true;
     }
 
     @Override
     public String toString() {
-        return "EstructuraGeografica{" +
-                "id=" + id +
-                ", idPais=" + idPais +
-                ", nombre='" + nombre + '\'' +
-                ", estado='" + estado + '\'' +
-                ", version=" + version +
-                '}';
+        return "EstructuraGeografica [id=" + id + ", idPais=" + idPais + ", nombre=" + nombre + ", estado=" + estado
+                + ", version=" + version + "]";
     }
+
 }

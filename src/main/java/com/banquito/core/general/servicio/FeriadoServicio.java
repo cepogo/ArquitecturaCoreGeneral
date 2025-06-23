@@ -39,9 +39,8 @@ public class FeriadoServicio {
     // Crear feriado por país o locación geográfica
     @Transactional
     public FeriadoDTO crearFeriado(FeriadoCreacionDTO dto) {
+        log.info("Iniciando creación de feriado: {} - Tipo: {}", dto.getNombre(), dto.getTipo());
         try {
-            log.info("Creando feriado: {} - Tipo: {}", dto.getNombre(), dto.getTipo());
-            
             // Verificar que el país existe
             Pais pais = paisRepositorio.findById(dto.getIdPais())
                 .orElseThrow(() -> new EntidadNoEncontradaException("País no encontrado: " + dto.getIdPais(), 2, "Pais"));
@@ -57,11 +56,10 @@ public class FeriadoServicio {
             
             // Lógica para asignar locación según el tipo
             if (TipoFeriadosEnum.NACIONAL.equals(dto.getTipo())) {
-                // Feriado nacional: idLocacion = null
+                log.debug("Asignando feriado como NACIONAL para el país {}", dto.getIdPais());
                 feriado.setIdLocacion(null);
-                log.info("Feriado nacional creado para país: {}", dto.getIdPais());
             } else if (TipoFeriadosEnum.LOCAL.equals(dto.getTipo())) {
-                // Feriado local: verificar que se proporcionó idLocacion
+                log.debug("Asignando feriado como LOCAL para la locación {}", dto.getIdLocacion());
                 if (dto.getIdLocacion() == null) {
                     throw new CrearEntidadException("Feriado", "Para feriados locales debe especificar idLocacion");
                 }
@@ -75,18 +73,17 @@ public class FeriadoServicio {
                 }
                 
                 feriado.setIdLocacion(locacion);
-                log.info("Feriado local creado para locación: {} en país: {}", dto.getIdLocacion(), dto.getIdPais());
             }
             
             Feriado feriadoGuardado = feriadoRepositorio.save(feriado);
-            log.info("Feriado creado exitosamente con ID: {}", feriadoGuardado.getIdFeriado());
+            log.info("Feriado {} creado exitosamente con ID: {}", feriadoGuardado.getNombre(), feriadoGuardado.getIdFeriado());
             
             return feriadoMapper.toDTO(feriadoGuardado);
         } catch (EntidadNoEncontradaException | CrearEntidadException e) {
-            log.error("Error al crear feriado: {}", e.getMessage());
+            log.error("Error de validación al crear feriado {}: {}", dto.getNombre(), e.getMessage());
             throw e;
         } catch (Exception e) {
-            log.error("Error inesperado al crear feriado", e);
+            log.error("Error inesperado al crear feriado {}: {}", dto.getNombre(), e.getMessage(), e);
             throw new CrearEntidadException("Feriado", "Error al crear el feriado: " + e.getMessage());
         }
     }
@@ -94,12 +91,10 @@ public class FeriadoServicio {
     // Modificar solo fecha y nombre
     @Transactional
     public FeriadoDTO modificarFeriado(Integer idFeriado, FeriadoUpdateDTO dto) {
+        log.info("Iniciando modificación del feriado con ID: {}", idFeriado);
         Feriado entity = feriadoRepositorio.findById(idFeriado)
                 .orElseThrow(() -> new EntidadNoEncontradaException("Feriado no encontrado", 2, "Feriado"));
         try {
-            log.info("Modificando feriado con ID: {}", idFeriado);
-            
-            // Actualizar solo fecha y nombre
             entity.setFecha(dto.getFecha());
             entity.setNombre(dto.getNombre());
             
@@ -107,11 +102,11 @@ public class FeriadoServicio {
             entity.setVersion(entity.getVersion() == null ? 1L : entity.getVersion() + 1L);
             
             Feriado feriadoActualizado = feriadoRepositorio.save(entity);
-            log.info("Feriado modificado exitosamente");
+            log.info("Feriado con ID {} modificado exitosamente.", idFeriado);
             
             return feriadoMapper.toDTO(feriadoActualizado);
         } catch (Exception e) {
-            log.error("Error al modificar feriado", e);
+            log.error("Error al modificar feriado con ID {}: {}", idFeriado, e.getMessage(), e);
             throw new ActualizarEntidadException("Feriado", "Error al modificar el feriado: " + e.getMessage());
         }
     }
@@ -119,25 +114,24 @@ public class FeriadoServicio {
     // Eliminación lógica
     @Transactional
     public void eliminarLogicoFeriado(Integer idFeriado) {
+        log.info("Iniciando eliminación lógica del feriado con ID: {}", idFeriado);
         Feriado entity = feriadoRepositorio.findById(idFeriado)
                 .orElseThrow(() -> new EntidadNoEncontradaException("Feriado no encontrado", 2, "Feriado"));
         try {
-            log.info("Eliminando lógicamente feriado con ID: {}", idFeriado);
-            
             entity.setEstado(EstadoGeneralEnum.INACTIVO);
             entity.setVersion(entity.getVersion() == null ? 1L : entity.getVersion() + 1L);
             feriadoRepositorio.save(entity);
             
-            log.info("Feriado eliminado lógicamente exitosamente");
+            log.info("Feriado con ID {} eliminado lógicamente.", idFeriado);
         } catch (Exception e) {
-            log.error("Error al eliminar feriado", e);
+            log.error("Error al eliminar feriado con ID {}: {}", idFeriado, e.getMessage(), e);
             throw new EliminarEntidadException("Feriado", "Error al eliminar lógicamente el feriado: " + e.getMessage());
         }
     }
 
     // Listar feriados activos por año y locación
     public List<FeriadoDTO> listarFeriadosActivosPorAnioYLocacion(int anio, Integer idLocacion) {
-        log.info("Listando feriados activos para año: {} y locación: {}", anio, idLocacion);
+        log.info("Listando feriados activos para año {} y locación ID: {}", anio, idLocacion);
         
         Calendar cal = Calendar.getInstance();
         cal.set(anio, Calendar.JANUARY, 1, 0, 0, 0);
@@ -149,13 +143,14 @@ public class FeriadoServicio {
                 EstadoGeneralEnum.ACTIVO, fechaInicio, fechaFin, idLocacion);
         
         List<FeriadoDTO> resultado = feriados.stream().map(feriadoMapper::toDTO).collect(Collectors.toList());
-        log.info("Se encontraron {} feriados activos", resultado.size());
+        log.info("Se encontraron {} feriados activos para año {} y locación ID {}", resultado.size(), anio, idLocacion);
         
         return resultado;
     }
 
     // Listar todos los feriados (nacionales y locales) de un año
     public List<FeriadoDTO> listarFeriadosPorAnio(int anio) {
+        log.info("Listando todos los feriados para el año: {}", anio);
         Calendar cal = Calendar.getInstance();
         cal.set(anio, Calendar.JANUARY, 1, 0, 0, 0);
         Date fechaInicio = cal.getTime();
@@ -163,11 +158,13 @@ public class FeriadoServicio {
         Date fechaFin = cal.getTime();
         List<Feriado> feriados = feriadoRepositorio.findByEstadoAndFechaBetween(
                 EstadoGeneralEnum.ACTIVO, fechaInicio, fechaFin);
+        log.info("Se encontraron {} feriados en total para el año {}", feriados.size(), anio);
         return feriados.stream().map(feriadoMapper::toDTO).collect(Collectors.toList());
     }
 
     // Listar solo feriados nacionales de un año
     public List<FeriadoDTO> listarFeriadosNacionalesPorAnio(int anio) {
+        log.info("Listando feriados NACIONALES para el año: {}", anio);
         Calendar cal = Calendar.getInstance();
         cal.set(anio, Calendar.JANUARY, 1, 0, 0, 0);
         Date fechaInicio = cal.getTime();
@@ -175,11 +172,13 @@ public class FeriadoServicio {
         Date fechaFin = cal.getTime();
         List<Feriado> feriados = feriadoRepositorio.findByEstadoAndFechaBetweenAndTipo(
                 EstadoGeneralEnum.ACTIVO, fechaInicio, fechaFin, TipoFeriadosEnum.NACIONAL);
+        log.info("Se encontraron {} feriados nacionales para el año {}", feriados.size(), anio);
         return feriados.stream().map(feriadoMapper::toDTO).collect(Collectors.toList());
     }
 
     // Listar solo feriados locales de un año, opcionalmente filtrados por locación
     public List<FeriadoDTO> listarFeriadosLocalesPorAnio(int anio, Integer idLocacion) {
+        log.info("Listando feriados LOCALES para el año: {}. Filtro de locación ID: {}", anio, idLocacion);
         Calendar cal = Calendar.getInstance();
         cal.set(anio, Calendar.JANUARY, 1, 0, 0, 0);
         Date fechaInicio = cal.getTime();
@@ -193,6 +192,7 @@ public class FeriadoServicio {
             feriados = feriadoRepositorio.findByEstadoAndFechaBetweenAndTipo(
                     EstadoGeneralEnum.ACTIVO, fechaInicio, fechaFin, TipoFeriadosEnum.LOCAL);
         }
+        log.info("Se encontraron {} feriados locales para los criterios de búsqueda.", feriados.size());
         return feriados.stream().map(feriadoMapper::toDTO).collect(Collectors.toList());
     }
 } 

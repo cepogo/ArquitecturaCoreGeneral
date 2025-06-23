@@ -5,7 +5,6 @@ import com.banquito.core.general.enums.TipoFeriadosEnum;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import java.math.BigDecimal;
 import java.util.Date;
 
 @Data

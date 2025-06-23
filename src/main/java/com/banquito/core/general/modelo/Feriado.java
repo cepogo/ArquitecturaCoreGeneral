@@ -3,13 +3,16 @@ package com.banquito.core.general.modelo;
 import com.banquito.core.general.enums.EstadoGeneralEnum;
 import com.banquito.core.general.enums.TipoFeriadosEnum;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Objects;
 
 @Entity
 @Table(name = "feriados")
+@Getter
+@Setter
 public class Feriado {
 
     @Id
@@ -49,93 +52,36 @@ public class Feriado {
         this.idFeriado = idFeriado;
     }
 
-    public Integer getIdFeriado() {
-        return idFeriado;
-    }
-
-    public void setIdFeriado(Integer idFeriado) {
-        this.idFeriado = idFeriado;
-    }
-
-    public Date getFecha() {
-        return fecha;
-    }
-
-    public void setFecha(Date fecha) {
-        this.fecha = fecha;
-    }
-
-    public Pais getIdPais() {
-        return idPais;
-    }
-
-    public void setIdPais(Pais idPais) {
-        this.idPais = idPais;
-    }
-
-    public LocacionGeografica getIdLocacion() {
-        return idLocacion;
-    }
-
-    public void setIdLocacion(LocacionGeografica idLocacion) {
-        this.idLocacion = idLocacion;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public TipoFeriadosEnum getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(TipoFeriadosEnum tipo) {
-        this.tipo = tipo;
-    }
-
-    public EstadoGeneralEnum getEstado() {
-        return estado;
-    }
-
-    public void setEstado(EstadoGeneralEnum estado) {
-        this.estado = estado;
-    }
-
-    public Long getVersion() {
-        return version;
-    }
-
-    public void setVersion(Long version) {
-        this.version = version;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Feriado feriados = (Feriado) o;
-        return Objects.equals(idFeriado, feriados.idFeriado);
-    }
-
     @Override
     public int hashCode() {
-        return Objects.hashCode(idFeriado);
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((idFeriado == null) ? 0 : idFeriado.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Feriado other = (Feriado) obj;
+        if (idFeriado == null) {
+            if (other.idFeriado != null)
+                return false;
+        } else if (!idFeriado.equals(other.idFeriado))
+            return false;
+        return true;
     }
 
     @Override
     public String toString() {
-        return "Feriado{" +
-                "idFeriado=" + idFeriado +
-                ", fecha=" + fecha +
-                ", idPais=" + idPais +
-                ", idLocacion=" + idLocacion +
-                ", nombre='" + nombre + '\'' +
-                ", tipo=" + tipo +
-                ", estado=" + estado +
-                ", version=" + version +
-                '}';
+        return "Feriado [idFeriado=" + idFeriado + ", fecha=" + fecha + ", idPais=" + idPais + ", idLocacion="
+                + idLocacion + ", nombre=" + nombre + ", tipo=" + tipo + ", estado=" + estado + ", version=" + version
+                + "]";
     }
+
 }

@@ -22,12 +22,10 @@ import com.banquito.core.general.excepcion.CrearEntidadException;
 import com.banquito.core.general.excepcion.EliminarEntidadException;
 import com.banquito.core.general.excepcion.ActualizarEntidadException;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -45,6 +43,7 @@ public class EstructuraLocacionGeograficaServicio {
     // Crear Estructura Geográfica
     @Transactional
     public EstructuraGeograficaDTO crearEstructuraGeografica(EstructuraGeograficaCreacionDTO dto) {
+        log.info("Iniciando creación de estructura geográfica para país {} y nivel {}", dto.getIdPais(), dto.getCodigoNivel());
         try {
             Pais pais = this.paisRepositorio.findById(dto.getIdPais())
                     .orElseThrow(() -> new EntidadNoEncontradaException("El país con id " + dto.getIdPais() + " no existe.", 2, "Pais"));
@@ -60,10 +59,13 @@ public class EstructuraLocacionGeograficaServicio {
             entity.setNombre(dto.getNombre());
             entity.setEstado(EstadoGeneralEnum.ACTIVO);
             entity.setVersion(1L); // Versión inicial
-            return estructuraGeograficaMapper.toDTO(this.estructuraGeograficaRepositorio.save(entity));
+            EstructuraGeografica savedEntity = this.estructuraGeograficaRepositorio.save(entity);
+            log.info("Estructura geográfica creada exitosamente para país {} y nivel {}", savedEntity.getId().getIdPais(), savedEntity.getId().getCodigoNivel());
+            return estructuraGeograficaMapper.toDTO(savedEntity);
         } catch (EntidadNoEncontradaException e) {
             throw e;
         } catch (Exception e) {
+            log.error("Error al crear estructura geográfica para país {}: {}", dto.getIdPais(), e.getMessage(), e);
             throw new CrearEntidadException("EstructuraGeografica", "Error al crear la estructura geográfica: " + e.getMessage());
         }
     }
@@ -95,26 +97,30 @@ public class EstructuraLocacionGeograficaServicio {
             // Lógica automática para asignar la locación padre según el código de nivel
             java.math.BigDecimal codigoNivel = java.math.BigDecimal.valueOf(dto.getCodigoNivel());
             if (codigoNivel.equals(java.math.BigDecimal.ONE)) {
-                // Nivel 1: no tiene padre
+                log.debug("Nivel 1: No se asigna locación padre.");
                 locacion.setIdLocacionPadre(null);
             } else if (codigoNivel.equals(java.math.BigDecimal.valueOf(2))) {
-                // Nivel 2: buscar la locación padre específica o la primera del país
+                log.debug("Nivel 2: Buscando locación padre para país {}", dto.getIdPais());
                 Optional<LocacionGeografica> locacionPadre;
                 
                 if (dto.getIdProvinciaPadre() != null) {
-                    // Buscar la provincia específica proporcionada
+                    log.debug("Buscando provincia padre específica con ID: {}", dto.getIdProvinciaPadre());
                     locacionPadre = locacionGeograficaRepositorio.findById(dto.getIdProvinciaPadre())
-                        .filter(loc -> loc.getEstructuraGeografica().getId().getIdPais().equals(dto.getIdPais()) &&
+                        .filter(loc -> {
+                            boolean match = loc.getEstructuraGeografica().getId().getIdPais().equals(dto.getIdPais()) &&
                                       loc.getEstructuraGeografica().getId().getCodigoNivel().equals(java.math.BigDecimal.ONE) &&
-                                      loc.getEstado() == EstadoLocacionesGeograficasEnum.ACTIVO);
+                                      loc.getEstado() == EstadoLocacionesGeograficasEnum.ACTIVO;
+                            return match;
+                        });
                     
                     if (locacionPadre.isEmpty()) {
+                        log.warn("No se encontró la provincia padre con ID {}", dto.getIdProvinciaPadre());
                         throw new CrearEntidadException("LocacionGeografica", 
                             "No se encontró la provincia con ID " + dto.getIdProvinciaPadre() + 
                             " para el país " + dto.getIdPais() + " o no está activa");
                     }
                 } else {
-                    // Buscar la primera provincia del país (comportamiento anterior)
+                    log.warn("No se proporcionó idProvinciaPadre para nivel 2. Se buscará la primera provincia activa del país {}.", dto.getIdPais());
                     locacionPadre = locacionGeograficaRepositorio
                         .findFirstByEstructuraGeografica_Id_IdPaisAndEstructuraGeografica_Id_CodigoNivelAndEstado(
                             dto.getIdPais(), 
@@ -142,7 +148,7 @@ public class EstructuraLocacionGeograficaServicio {
             log.error("Error al crear locación geográfica: {}", e.getMessage());
             throw e;
         } catch (Exception e) {
-            log.error("Error inesperado al crear locación geográfica", e);
+            log.error("Error inesperado al crear locación geográfica para {}: {}", dto.getNombre(), e.getMessage(), e);
             throw new CrearEntidadException("LocacionGeografica", "Error al crear locación geográfica: " + e.getMessage());
         }
     }
@@ -150,6 +156,7 @@ public class EstructuraLocacionGeograficaServicio {
     // Eliminación lógica Estructura Geográfica
     @Transactional
     public void eliminarLogicoEstructuraGeografica(String idPais, Integer codigoNivel) {
+        log.info("Iniciando eliminación lógica de estructura geográfica para país {} y nivel {}", idPais, codigoNivel);
         EstructuraGeograficaId id = new EstructuraGeograficaId();
         id.setIdPais(idPais);
         id.setCodigoNivel(java.math.BigDecimal.valueOf(codigoNivel));
@@ -158,7 +165,9 @@ public class EstructuraLocacionGeograficaServicio {
         try {
             entity.setEstado(EstadoGeneralEnum.INACTIVO);
             estructuraGeograficaRepositorio.save(entity);
+            log.info("Estructura geográfica para país {} y nivel {} eliminada lógicamente.", idPais, codigoNivel);
         } catch (Exception e) {
+            log.error("Error en eliminación lógica de estructura geográfica para país {}: {}", idPais, e.getMessage(), e);
             throw new EliminarEntidadException("EstructuraGeografica", "Error al eliminar lógicamente la estructura geográfica: " + e.getMessage());
         }
     }
@@ -166,12 +175,15 @@ public class EstructuraLocacionGeograficaServicio {
     // Eliminación lógica Locación Geográfica
     @Transactional
     public void eliminarLogicoLocacionGeografica(Integer idLocacion) {
+        log.info("Iniciando eliminación lógica de locación geográfica con ID: {}", idLocacion);
         LocacionGeografica entity = locacionGeograficaRepositorio.findById(idLocacion)
                 .orElseThrow(() -> new EntidadNoEncontradaException("Locación geográfica no encontrada", 2, "LocacionGeografica"));
         try {
             entity.setEstado(EstadoLocacionesGeograficasEnum.INACTIVO);
             locacionGeograficaRepositorio.save(entity);
+            log.info("Locación geográfica con ID {} eliminada lógicamente.", idLocacion);
         } catch (Exception e) {
+            log.error("Error en eliminación lógica de locación geográfica {}: {}", idLocacion, e.getMessage(), e);
             throw new EliminarEntidadException("LocacionGeografica", "Error al eliminar lógicamente la locación geográfica: " + e.getMessage());
         }
     }
@@ -179,6 +191,7 @@ public class EstructuraLocacionGeograficaServicio {
     // Modificar Estructura Geográfica
     @Transactional
     public EstructuraGeograficaDTO modificarEstructuraGeografica(String idPais, Integer codigoNivel, EstructuraGeograficaUpdateDTO dto) {
+        log.info("Iniciando modificación de estructura geográfica para país {} y nivel {}", idPais, codigoNivel);
         EstructuraGeograficaId id = new EstructuraGeograficaId();
         id.setIdPais(idPais);
         id.setCodigoNivel(java.math.BigDecimal.valueOf(codigoNivel));
@@ -191,8 +204,11 @@ public class EstructuraLocacionGeograficaServicio {
             }
             // Incrementar versión
             entity.setVersion(entity.getVersion() == null ? 1L : entity.getVersion() + 1L);
-            return estructuraGeograficaMapper.toDTO(estructuraGeograficaRepositorio.save(entity));
+            EstructuraGeografica savedEntity = estructuraGeograficaRepositorio.save(entity);
+            log.info("Estructura geográfica para país {} y nivel {} modificada exitosamente.", savedEntity.getId().getIdPais(), savedEntity.getId().getCodigoNivel());
+            return estructuraGeograficaMapper.toDTO(savedEntity);
         } catch (Exception e) {
+            log.error("Error al modificar estructura geográfica para país {}: {}", idPais, e.getMessage(), e);
             throw new ActualizarEntidadException("EstructuraGeografica", "Error al modificar la estructura geográfica: " + e.getMessage());
         }
     }
@@ -200,6 +216,7 @@ public class EstructuraLocacionGeograficaServicio {
     // Modificar Locación Geográfica
     @Transactional
     public LocacionGeograficaDTO modificarLocacionGeografica(Integer idLocacion, LocacionGeograficaUpdateDTO dto) {
+        log.info("Iniciando modificación de locación geográfica con ID: {}", idLocacion);
         LocacionGeografica entity = this.locacionGeograficaRepositorio.findById(idLocacion)
                 .orElseThrow(() -> new EntidadNoEncontradaException("Locación geográfica no encontrada", 2, "LocacionGeografica"));
         try {
@@ -224,14 +241,18 @@ public class EstructuraLocacionGeograficaServicio {
             
             // Incrementar versión
             entity.setVersion(entity.getVersion() == null ? 1L : entity.getVersion() + 1L);
-            return locacionGeograficaMapper.toDTO(this.locacionGeograficaRepositorio.save(entity));
+            LocacionGeografica savedEntity = this.locacionGeograficaRepositorio.save(entity);
+            log.info("Locación geográfica con ID {} modificada exitosamente.", savedEntity.getIdLocacion());
+            return locacionGeograficaMapper.toDTO(savedEntity);
         } catch (Exception e) {
+            log.error("Error al modificar locación geográfica {}: {}", idLocacion, e.getMessage(), e);
             throw new ActualizarEntidadException("LocacionGeografica", "Error al modificar la locación geográfica: " + e.getMessage());
         }
     }
 
     // Listar locaciones geográficas activas por nivel
     public List<LocacionGeograficaDTO> listarLocacionesActivasPorNivel(String idPais, Integer codigoNivel) {
+        log.info("Listando locaciones activas para país {} y nivel {}", idPais, codigoNivel);
         List<LocacionGeografica> locaciones = locacionGeograficaRepositorio.findAll()
                 .stream()
                 .filter(l -> l.getEstructuraGeografica() != null
@@ -240,11 +261,13 @@ public class EstructuraLocacionGeograficaServicio {
                         && l.getEstructuraGeografica().getId().getCodigoNivel().intValue() == codigoNivel
                         && l.getEstado() == EstadoLocacionesGeograficasEnum.ACTIVO)
                 .collect(Collectors.toList());
+        log.info("Se encontraron {} locaciones para país {} y nivel {}", locaciones.size(), idPais, codigoNivel);
         return locaciones.stream().map(locacionGeograficaMapper::toDTO).collect(Collectors.toList());
     }
 
     // Listar todas las provincias de un país
     public List<LocacionGeograficaDTO> listarProvincias(String idPais) {
+        log.info("Listando todas las provincias para el país {}", idPais);
         List<LocacionGeografica> provincias = locacionGeograficaRepositorio.findAll()
                 .stream()
                 .filter(l -> l.getEstructuraGeografica() != null
@@ -253,11 +276,13 @@ public class EstructuraLocacionGeograficaServicio {
                         && l.getEstructuraGeografica().getId().getCodigoNivel().equals(java.math.BigDecimal.ONE)
                         && l.getEstado() == EstadoLocacionesGeograficasEnum.ACTIVO)
                 .collect(Collectors.toList());
+        log.info("Se encontraron {} provincias para el país {}", provincias.size(), idPais);
         return provincias.stream().map(locacionGeograficaMapper::toDTO).collect(Collectors.toList());
     }
 
     // Listar cantones de una provincia específica
     public List<LocacionGeograficaDTO> listarCantonesPorProvincia(String idPais, String nombreProvincia) {
+        log.info("Listando cantones para la provincia {} del país {}", nombreProvincia, idPais);
         // Primero verificar que la provincia existe
         Optional<LocacionGeografica> provincia = locacionGeograficaRepositorio
             .findFirstByNombreAndEstructuraGeografica_Id_IdPaisAndEstructuraGeografica_Id_CodigoNivelAndEstado(
@@ -280,12 +305,14 @@ public class EstructuraLocacionGeograficaServicio {
                         && l.getEstado() == EstadoLocacionesGeograficasEnum.ACTIVO)
                 .collect(Collectors.toList());
         
+        log.info("Se encontraron {} cantones para la provincia {}", cantones.size(), nombreProvincia);
         return cantones.stream().map(locacionGeograficaMapper::toDTO).collect(Collectors.toList());
     }
 
     // Cambiar estado de Estructura Geográfica
     @Transactional
     public EstructuraGeograficaDTO cambiarEstadoEstructuraGeografica(String idPais, Integer codigoNivel, EstadoGeneralEnum nuevoEstado) {
+        log.info("Cambiando estado de estructura geográfica para país {} y nivel {} a {}", idPais, codigoNivel, nuevoEstado);
         EstructuraGeograficaId id = new EstructuraGeograficaId();
         id.setIdPais(idPais);
         id.setCodigoNivel(java.math.BigDecimal.valueOf(codigoNivel));
@@ -294,8 +321,11 @@ public class EstructuraLocacionGeograficaServicio {
         try {
             entity.setEstado(nuevoEstado);
             entity.setVersion(entity.getVersion() == null ? 1L : entity.getVersion() + 1L);
-            return this.estructuraGeograficaMapper.toDTO(this.estructuraGeograficaRepositorio.save(entity));
+            EstructuraGeografica savedEntity = this.estructuraGeograficaRepositorio.save(entity);
+            log.info("Estado de estructura geográfica cambiado exitosamente para país {} y nivel {}", idPais, codigoNivel);
+            return this.estructuraGeograficaMapper.toDTO(savedEntity);
         } catch (Exception e) {
+            log.error("Error al cambiar estado de estructura geográfica para país {}: {}", idPais, e.getMessage(), e);
             throw new ActualizarEntidadException("EstructuraGeografica", "Error al cambiar el estado de la estructura geográfica: " + e.getMessage());
         }
     }

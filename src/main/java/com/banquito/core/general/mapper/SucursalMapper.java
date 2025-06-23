@@ -15,15 +15,15 @@ public interface SucursalMapper {
     SucursalMapper INSTANCE = Mappers.getMapper(SucursalMapper.class);
 
     @Mappings({
-        @Mapping(source = "idEntidadBancaria.id", target = "idEntidadBancaria"),
+        @Mapping(source = "idEntidadBancaria.idEntidadBancaria", target = "idEntidadBancaria"),
         @Mapping(source = "idLocacion.idLocacion", target = "idLocacion"),
         @Mapping(target = "estado", expression = "java(com.banquito.core.general.enums.EstadoSucursalesEnum.valueOf(entity.getEstado()))")
     })
     SucursalDTO toDTO(Sucursal entity);
 
     @Mappings({
-        @Mapping(target = "idEntidadBancaria.id", source = "idEntidadBancaria"),
-        @Mapping(target = "idLocacion.idLocacion", source = "idLocacion"),
+        @Mapping(source = "idEntidadBancaria", target = "idEntidadBancaria.idEntidadBancaria"),
+        @Mapping(source = "idLocacion", target = "idLocacion.idLocacion"),
         @Mapping(target = "estado", expression = "java(dto.getEstado().name())")
     })
     Sucursal toEntity(SucursalDTO dto);

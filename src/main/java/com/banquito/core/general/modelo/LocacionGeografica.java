@@ -2,11 +2,14 @@ package com.banquito.core.general.modelo;
 
 import com.banquito.core.general.enums.EstadoLocacionesGeograficasEnum;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.util.Objects;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "locaciones_geograficas")
 public class LocacionGeografica {
 
@@ -52,102 +55,37 @@ public class LocacionGeografica {
         this.idLocacion = idLocacion;
     }
 
-    public Integer getIdLocacion() {
-        return idLocacion;
-    }
-
-    public void setIdLocacion(Integer idLocacion) {
-        this.idLocacion = idLocacion;
-    }
-
-    public LocacionGeografica getIdLocacionPadre() {
-        return idLocacionPadre;
-    }
-
-    public void setIdLocacionPadre(LocacionGeografica idLocacionPadre) {
-        this.idLocacionPadre = idLocacionPadre;
-    }
-
-    public EstructuraGeografica getEstructuraGeografica() {
-        return estructuraGeografica;
-    }
-
-    public void setEstructuraGeografica(EstructuraGeografica estructuraGeografica) {
-        this.estructuraGeografica = estructuraGeografica;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public String getCodigoTelefonoArea() {
-        return codigoTelefonoArea;
-    }
-
-    public void setCodigoTelefonoArea(String codigoTelefonoArea) {
-        this.codigoTelefonoArea = codigoTelefonoArea;
-    }
-
-    public String getCodigoGeografico() {
-        return codigoGeografico;
-    }
-
-    public void setCodigoGeografico(String codigoGeografico) {
-        this.codigoGeografico = codigoGeografico;
-    }
-
-    public String getCodigoPostal() {
-        return codigoPostal;
-    }
-
-    public void setCodigoPostal(String codigoPostal) {
-        this.codigoPostal = codigoPostal;
-    }
-
-    public EstadoLocacionesGeograficasEnum getEstado() {
-        return estado;
-    }
-
-    public void setEstado(EstadoLocacionesGeograficasEnum estado) {
-        this.estado = estado;
-    }
-
-    public Long getVersion() {
-        return version;
-    }
-
-    public void setVersion(Long version) {
-        this.version = version;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        LocacionGeografica that = (LocacionGeografica) o;
-        return Objects.equals(idLocacion, that.idLocacion);
-    }
-
     @Override
     public int hashCode() {
-        return Objects.hashCode(idLocacion);
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((idLocacion == null) ? 0 : idLocacion.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        LocacionGeografica other = (LocacionGeografica) obj;
+        if (idLocacion == null) {
+            if (other.idLocacion != null)
+                return false;
+        } else if (!idLocacion.equals(other.idLocacion))
+            return false;
+        return true;
     }
 
     @Override
     public String toString() {
-        return "LocacionGeografica{" +
-                "idLocacion=" + idLocacion +
-                ", idLocacionPadre=" + idLocacionPadre +
-                ", estructuraGeografica=" + estructuraGeografica +
-                ", nombre='" + nombre + '\'' +
-                ", codigoTelefonoArea='" + codigoTelefonoArea + '\'' +
-                ", codigoGeografico='" + codigoGeografico + '\'' +
-                ", codigoPostal='" + codigoPostal + '\'' +
-                ", estado=" + estado +
-                ", version=" + version +
-                '}';
+        return "LocacionGeografica [idLocacion=" + idLocacion + ", idLocacionPadre=" + idLocacionPadre
+                + ", estructuraGeografica=" + estructuraGeografica + ", nombre=" + nombre + ", codigoTelefonoArea="
+                + codigoTelefonoArea + ", codigoGeografico=" + codigoGeografico + ", codigoPostal=" + codigoPostal
+                + ", estado=" + estado + ", version=" + version + "]";
     }
+
 }

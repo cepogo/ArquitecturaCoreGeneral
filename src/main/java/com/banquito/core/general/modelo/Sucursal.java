@@ -1,10 +1,16 @@
 package com.banquito.core.general.modelo;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Objects;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "sucursales")
 public class Sucursal {
     @Id
@@ -18,7 +24,7 @@ public class Sucursal {
     @ManyToOne
     @JoinColumn(name = "id_locacion", referencedColumnName = "id_locacion")
     private LocacionGeografica idLocacion;
-    
+
     @Column(name = "nombre", nullable = false, length = 30)
     private String nombre;
 
@@ -50,109 +56,11 @@ public class Sucursal {
     @Column(name = "version", nullable = false)
     private Long version;
 
-    // Getters y Setters
-    public String getCodigo() {
-        return codigo;
+    public Sucursal() {
     }
 
-    public void setCodigo(String codigo) {
+    public Sucursal(String codigo) {
         this.codigo = codigo;
-    }
-
-    public LocacionGeografica getIdLocacion() {
-        return idLocacion;
-    }
-
-    public void setIdLocacion(LocacionGeografica idLocacion) {
-        this.idLocacion = idLocacion;
-    }
-
-    public EntidadBancaria getIdEntidadBancaria() {
-        return idEntidadBancaria;
-    }
-
-    public void setIdEntidadBancaria(EntidadBancaria idEntidadBancaria) {
-        this.idEntidadBancaria = idEntidadBancaria;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public Date getFechaCreacion() {
-        return fechaCreacion;
-    }
-
-    public void setFechaCreacion(Date fechaCreacion) {
-        this.fechaCreacion = fechaCreacion;
-    }
-
-    public String getCorreoElectronico() {
-        return correoElectronico;
-    }
-
-    public void setCorreoElectronico(String correoElectronico) {
-        this.correoElectronico = correoElectronico;
-    }
-
-    public String getTelefono() {
-        return telefono;
-    }
-
-    public void setTelefono(String telefono) {
-        this.telefono = telefono;
-    }
-
-    public String getDireccionLinea1() {
-        return direccionLinea1;
-    }
-
-    public void setDireccionLinea1(String direccionLinea1) {
-        this.direccionLinea1 = direccionLinea1;
-    }
-
-    public String getDireccionLinea2() {
-        return direccionLinea2;
-    }
-
-    public void setDireccionLinea2(String direccionLinea2) {
-        this.direccionLinea2 = direccionLinea2;
-    }
-
-    public BigDecimal getLatitud() {
-        return latitud;
-    }
-
-    public void setLatitud(BigDecimal latitud) {
-        this.latitud = latitud;
-    }
-
-    public BigDecimal getLongitud() {
-        return longitud;
-    }
-
-    public void setLongitud(BigDecimal longitud) {
-        this.longitud = longitud;
-    }
-
-    public String getEstado() {
-        return estado;
-    }
-
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
-
-    public Long getVersion() {
-        return version;
-    }
-
-    public void setVersion(Long version) {
-        this.version = version;
     }
 
     @Override
@@ -189,4 +97,4 @@ public class Sucursal {
                 + ", version=" + version + "]";
     }
 
-} 
+}
