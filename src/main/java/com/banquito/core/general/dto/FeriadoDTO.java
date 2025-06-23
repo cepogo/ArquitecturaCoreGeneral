@@ -5,6 +5,8 @@ import com.banquito.core.general.enums.TipoFeriadosEnum;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+
+import java.time.LocalDate;
 import java.util.Date;
 
 @Data
@@ -12,7 +14,7 @@ public class FeriadoDTO {
     private Integer idFeriado;
 
     @NotNull(message = "La fecha no puede ser nula")
-    private Date fecha;
+    private LocalDate fecha;
 
     @Size(max = 2, message = "El ID del país debe tener máximo 2 caracteres")
     private String idPais;

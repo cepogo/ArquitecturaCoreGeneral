@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -20,7 +21,7 @@ public class Feriado {
     private Integer idFeriado;
 
     @Column(name = "fecha", nullable = false)
-    private Date fecha;
+    private LocalDate fecha;
 
     @ManyToOne
     @JoinColumn(name = "id_pais", referencedColumnName = "id_pais")
