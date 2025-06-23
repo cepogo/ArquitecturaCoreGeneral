@@ -7,7 +7,6 @@ import com.banquito.core.general.enums.EstadoSucursalesEnum;
 import com.banquito.core.general.excepcion.ActualizarEntidadException;
 import com.banquito.core.general.excepcion.CrearEntidadException;
 import com.banquito.core.general.excepcion.EntidadNoEncontradaException;
-import com.banquito.core.general.excepcion.EliminarEntidadException;
 import com.banquito.core.general.mapper.SucursalMapper;
 import com.banquito.core.general.modelo.Sucursal;
 import com.banquito.core.general.repositorio.EntidadBancariaRepositorio;
@@ -102,7 +101,7 @@ public class SucursalServicio {
     // Modificar estado de sucursal
     @Transactional
     public SucursalDTO modificarEstadoSucursal(String codigo, EstadoSucursalesEnum estado) {
-        log.info("Modificando estado de sucursal {} a {}", codigo, estado.name());
+        log.info("Iniciando modificación de sucursal con código: {}", codigo);
         Sucursal entity = sucursalRepositorio.findById(codigo)
                 .orElseThrow(() -> new EntidadNoEncontradaException("Sucursal no encontrada", 2, "Sucursal"));
         try {
@@ -117,20 +116,37 @@ public class SucursalServicio {
         }
     }
 
-    // Eliminación lógica (cambia estado a INACTIVO)
+    // Cambiar estado de sucursal (ACTIVO/INACTIVO/CONSTRUCCION/REMODELACION)
     @Transactional
-    public void eliminarLogicoSucursal(String codigo) {
-        log.info("Iniciando eliminación lógica de sucursal con código: {}", codigo);
+    public void cambiarEstadoSucursal(String codigo, EstadoSucursalesEnum nuevoEstado) {
+        log.info("Cambiando estado de sucursal {} a {}", codigo, nuevoEstado.name());
         Sucursal entity = sucursalRepositorio.findById(codigo)
                 .orElseThrow(() -> new EntidadNoEncontradaException("Sucursal no encontrada", 2, "Sucursal"));
         try {
-            entity.setEstado(EstadoSucursalesEnum.INACTIVO.name());
+            // Solo validar para cambio a ACTIVO
+            if (nuevoEstado == EstadoSucursalesEnum.ACTIVO) {
+                if (entity.getIdEntidadBancaria() == null || entity.getIdLocacion() == null) {
+                    log.warn("No se puede activar la sucursal porque no tiene entidad bancaria o locación asociada.");
+                    throw new ActualizarEntidadException("Sucursal", "No se puede activar la sucursal porque no tiene entidad bancaria o locación asociada.");
+                }
+                // Verificar que la entidad bancaria esté ACTIVA
+                if (!"ACTIVO".equals(entity.getIdEntidadBancaria().getEstado().name())) {
+                    log.warn("No se puede activar la sucursal porque la entidad bancaria '{}' está inactiva.", entity.getIdEntidadBancaria().getNombre());
+                    throw new ActualizarEntidadException("Sucursal", "No se puede activar la sucursal porque la entidad bancaria '" + entity.getIdEntidadBancaria().getNombre() + "' está inactiva.");
+                }
+                // Verificar que la locación geográfica esté ACTIVA
+                if (!"ACTIVO".equals(entity.getIdLocacion().getEstado().name())) {
+                    log.warn("No se puede activar la sucursal porque la locación geográfica '{}' está inactiva.", entity.getIdLocacion().getNombre());
+                    throw new ActualizarEntidadException("Sucursal", "No se puede activar la sucursal porque la locación geográfica '" + entity.getIdLocacion().getNombre() + "' está inactiva.");
+                }
+            }
+            entity.setEstado(nuevoEstado.name());
             entity.setVersion(entity.getVersion() == null ? 1L : entity.getVersion() + 1L);
             sucursalRepositorio.save(entity);
-            log.info("Sucursal con código {} eliminada lógicamente.", codigo);
+            log.info("Estado de sucursal {} cambiado a {}.", codigo, nuevoEstado.name());
         } catch (Exception e) {
-            log.error("Error en eliminación lógica de sucursal {}: {}", codigo, e.getMessage(), e);
-            throw new EliminarEntidadException("Sucursal", "Error al eliminar lógicamente la sucursal: " + e.getMessage());
+            log.error("Error al cambiar estado de sucursal {}: {}", codigo, e.getMessage(), e);
+            throw new ActualizarEntidadException("Sucursal", "Error al cambiar el estado de la sucursal: " + e.getMessage());
         }
     }
 

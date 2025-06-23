@@ -48,17 +48,6 @@ public class FeriadoController {
         return ResponseEntity.ok(feriadoServicio.modificarFeriado(idFeriado, dto));
     }
 
-    @DeleteMapping("/{idFeriado}")
-    @Operation(summary = "Eliminación lógica de feriado", description = "Cambia el estado del feriado a INACTIVO.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Feriado eliminado lógicamente"),
-            @ApiResponse(responseCode = "404", description = "Feriado no encontrado")
-    })
-    public ResponseEntity<Void> eliminarFeriado(@PathVariable Integer idFeriado) {
-        feriadoServicio.eliminarLogicoFeriado(idFeriado);
-        return ResponseEntity.noContent().build();
-    }
-
     @GetMapping("/activos")
     @Operation(summary = "Listar feriados activos por año y locación", description = "Devuelve una lista de feriados activos para un año y locación específica.")
     public ResponseEntity<List<FeriadoDTO>> listarFeriadosActivosPorAnioYLocacion(
@@ -88,5 +77,18 @@ public class FeriadoController {
             @RequestParam int anio,
             @RequestParam(required = false) Integer idLocacion) {
         return ResponseEntity.ok(feriadoServicio.listarFeriadosLocalesPorAnio(anio, idLocacion));
+    }
+
+    @PatchMapping("/{idFeriado}/estado")
+    @Operation(summary = "Cambiar estado de feriado", description = "Cambia el estado (ACTIVO/INACTIVO) del feriado.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Estado cambiado exitosamente"),
+            @ApiResponse(responseCode = "404", description = "Feriado no encontrado")
+    })
+    public ResponseEntity<Void> cambiarEstadoFeriado(
+            @PathVariable Integer idFeriado,
+            @RequestParam com.banquito.core.general.enums.EstadoGeneralEnum nuevoEstado) {
+        feriadoServicio.cambiarEstadoFeriado(idFeriado, nuevoEstado);
+        return ResponseEntity.ok().build();
     }
 } 

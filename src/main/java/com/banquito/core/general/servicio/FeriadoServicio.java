@@ -7,7 +7,6 @@ import com.banquito.core.general.enums.EstadoGeneralEnum;
 import com.banquito.core.general.enums.TipoFeriadosEnum;
 import com.banquito.core.general.excepcion.ActualizarEntidadException;
 import com.banquito.core.general.excepcion.CrearEntidadException;
-import com.banquito.core.general.excepcion.EliminarEntidadException;
 import com.banquito.core.general.excepcion.EntidadNoEncontradaException;
 import com.banquito.core.general.mapper.FeriadoMapper;
 import com.banquito.core.general.modelo.Feriado;
@@ -111,21 +110,37 @@ public class FeriadoServicio {
         }
     }
 
-    // Eliminación lógica
+    // Cambiar estado de feriado (ACTIVO/INACTIVO)
     @Transactional
-    public void eliminarLogicoFeriado(Integer idFeriado) {
-        log.info("Iniciando eliminación lógica del feriado con ID: {}", idFeriado);
+    public void cambiarEstadoFeriado(Integer idFeriado, EstadoGeneralEnum nuevoEstado) {
+        log.info("Cambiando estado del feriado con ID: {} a {}", idFeriado, nuevoEstado);
         Feriado entity = feriadoRepositorio.findById(idFeriado)
                 .orElseThrow(() -> new EntidadNoEncontradaException("Feriado no encontrado", 2, "Feriado"));
         try {
-            entity.setEstado(EstadoGeneralEnum.INACTIVO);
+            // Solo validar para cambio a ACTIVO
+            if (nuevoEstado == EstadoGeneralEnum.ACTIVO) {
+                if (entity.getIdPais() == null) {
+                    log.warn("No se puede activar el feriado porque no tiene país asociado.");
+                    throw new ActualizarEntidadException("Feriado", "No se puede activar el feriado porque no tiene país asociado.");
+                }
+                // Verificar que el país esté ACTIVO
+                if (entity.getIdPais().getEstado() != EstadoGeneralEnum.ACTIVO) {
+                    log.warn("No se puede activar el feriado porque el país '{}' está inactivo.", entity.getIdPais().getNombre());
+                    throw new ActualizarEntidadException("Feriado", "No se puede activar el feriado porque el país '" + entity.getIdPais().getNombre() + "' está inactivo.");
+                }
+                // Si tiene locación asociada, verificar que esté ACTIVA
+                if (entity.getIdLocacion() != null && entity.getIdLocacion().getEstado() != com.banquito.core.general.enums.EstadoLocacionesGeograficasEnum.ACTIVO) {
+                    log.warn("No se puede activar el feriado porque la locación geográfica '{}' está inactiva.", entity.getIdLocacion().getNombre());
+                    throw new ActualizarEntidadException("Feriado", "No se puede activar el feriado porque la locación geográfica '" + entity.getIdLocacion().getNombre() + "' está inactiva.");
+                }
+            }
+            entity.setEstado(nuevoEstado);
             entity.setVersion(entity.getVersion() == null ? 1L : entity.getVersion() + 1L);
             feriadoRepositorio.save(entity);
-            
-            log.info("Feriado con ID {} eliminado lógicamente.", idFeriado);
+            log.info("Estado del feriado con ID {} cambiado a {}.", idFeriado, nuevoEstado);
         } catch (Exception e) {
-            log.error("Error al eliminar feriado con ID {}: {}", idFeriado, e.getMessage(), e);
-            throw new EliminarEntidadException("Feriado", "Error al eliminar lógicamente el feriado: " + e.getMessage());
+            log.error("Error al cambiar estado del feriado con ID {}: {}", idFeriado, e.getMessage(), e);
+            throw new ActualizarEntidadException("Feriado", "Error al cambiar el estado del feriado: " + e.getMessage());
         }
     }
 

@@ -1,6 +1,5 @@
 package com.banquito.core.general.dto;
 
-import com.banquito.core.general.enums.EstadoGeneralEnum;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 

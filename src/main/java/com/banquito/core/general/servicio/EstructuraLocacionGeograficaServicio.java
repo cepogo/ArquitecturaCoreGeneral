@@ -19,7 +19,6 @@ import com.banquito.core.general.repositorio.LocacionGeograficaRepositorio;
 import com.banquito.core.general.repositorio.PaisRepositorio;
 import com.banquito.core.general.excepcion.EntidadNoEncontradaException;
 import com.banquito.core.general.excepcion.CrearEntidadException;
-import com.banquito.core.general.excepcion.EliminarEntidadException;
 import com.banquito.core.general.excepcion.ActualizarEntidadException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -153,40 +152,7 @@ public class EstructuraLocacionGeograficaServicio {
         }
     }
 
-    // Eliminación lógica Estructura Geográfica
-    @Transactional
-    public void eliminarLogicoEstructuraGeografica(String idPais, Integer codigoNivel) {
-        log.info("Iniciando eliminación lógica de estructura geográfica para país {} y nivel {}", idPais, codigoNivel);
-        EstructuraGeograficaId id = new EstructuraGeograficaId();
-        id.setIdPais(idPais);
-        id.setCodigoNivel(java.math.BigDecimal.valueOf(codigoNivel));
-        EstructuraGeografica entity = estructuraGeograficaRepositorio.findById(id)
-                .orElseThrow(() -> new EntidadNoEncontradaException("Estructura geográfica no encontrada", 2, "EstructuraGeografica"));
-        try {
-            entity.setEstado(EstadoGeneralEnum.INACTIVO);
-            estructuraGeograficaRepositorio.save(entity);
-            log.info("Estructura geográfica para país {} y nivel {} eliminada lógicamente.", idPais, codigoNivel);
-        } catch (Exception e) {
-            log.error("Error en eliminación lógica de estructura geográfica para país {}: {}", idPais, e.getMessage(), e);
-            throw new EliminarEntidadException("EstructuraGeografica", "Error al eliminar lógicamente la estructura geográfica: " + e.getMessage());
-        }
-    }
-
-    // Eliminación lógica Locación Geográfica
-    @Transactional
-    public void eliminarLogicoLocacionGeografica(Integer idLocacion) {
-        log.info("Iniciando eliminación lógica de locación geográfica con ID: {}", idLocacion);
-        LocacionGeografica entity = locacionGeograficaRepositorio.findById(idLocacion)
-                .orElseThrow(() -> new EntidadNoEncontradaException("Locación geográfica no encontrada", 2, "LocacionGeografica"));
-        try {
-            entity.setEstado(EstadoLocacionesGeograficasEnum.INACTIVO);
-            locacionGeograficaRepositorio.save(entity);
-            log.info("Locación geográfica con ID {} eliminada lógicamente.", idLocacion);
-        } catch (Exception e) {
-            log.error("Error en eliminación lógica de locación geográfica {}: {}", idLocacion, e.getMessage(), e);
-            throw new EliminarEntidadException("LocacionGeografica", "Error al eliminar lógicamente la locación geográfica: " + e.getMessage());
-        }
-    }
+    
 
     // Modificar Estructura Geográfica
     @Transactional
@@ -311,22 +277,67 @@ public class EstructuraLocacionGeograficaServicio {
 
     // Cambiar estado de Estructura Geográfica
     @Transactional
-    public EstructuraGeograficaDTO cambiarEstadoEstructuraGeografica(String idPais, Integer codigoNivel, EstadoGeneralEnum nuevoEstado) {
+    public void cambiarEstadoEstructuraGeografica(String idPais, Integer codigoNivel, EstadoGeneralEnum nuevoEstado) {
         log.info("Cambiando estado de estructura geográfica para país {} y nivel {} a {}", idPais, codigoNivel, nuevoEstado);
         EstructuraGeograficaId id = new EstructuraGeograficaId();
         id.setIdPais(idPais);
         id.setCodigoNivel(java.math.BigDecimal.valueOf(codigoNivel));
-        EstructuraGeografica entity = this.estructuraGeograficaRepositorio.findById(id)
+        EstructuraGeografica entity = estructuraGeograficaRepositorio.findById(id)
                 .orElseThrow(() -> new EntidadNoEncontradaException("Estructura geográfica no encontrada", 2, "EstructuraGeografica"));
         try {
+            // Si se va a activar, verificar que el país esté ACTIVO
+            if (nuevoEstado == EstadoGeneralEnum.ACTIVO && entity.getIdPais() != null) {
+                if (entity.getIdPais().getEstado() != EstadoGeneralEnum.ACTIVO) {
+                    log.warn("No se puede activar la estructura geográfica porque el país '{}' está inactivo.", entity.getIdPais().getNombre());
+                    throw new ActualizarEntidadException("EstructuraGeografica", "No se puede activar la estructura geográfica porque el país '" + entity.getIdPais().getNombre() + "' está inactivo.");
+                }
+            }
             entity.setEstado(nuevoEstado);
-            entity.setVersion(entity.getVersion() == null ? 1L : entity.getVersion() + 1L);
-            EstructuraGeografica savedEntity = this.estructuraGeograficaRepositorio.save(entity);
+            estructuraGeograficaRepositorio.save(entity);
             log.info("Estado de estructura geográfica cambiado exitosamente para país {} y nivel {}", idPais, codigoNivel);
-            return this.estructuraGeograficaMapper.toDTO(savedEntity);
+
+            // Si se desactiva la estructura, desactivar todas las locaciones asociadas
+            if (nuevoEstado == EstadoGeneralEnum.INACTIVO) {
+                List<LocacionGeografica> locaciones = locacionGeograficaRepositorio.findAll()
+                        .stream()
+                        .filter(l -> l.getEstructuraGeografica() != null
+                                && l.getEstructuraGeografica().getId() != null
+                                && idPais.equals(l.getEstructuraGeografica().getId().getIdPais())
+                                && l.getEstructuraGeografica().getId().getCodigoNivel().intValue() == codigoNivel
+                                && l.getEstado() != EstadoLocacionesGeograficasEnum.INACTIVO)
+                        .collect(Collectors.toList());
+                for (LocacionGeografica loc : locaciones) {
+                    loc.setEstado(EstadoLocacionesGeograficasEnum.INACTIVO);
+                    locacionGeograficaRepositorio.save(loc);
+                    log.info("Locación geográfica con ID {} desactivada automáticamente por desactivación de estructura.", loc.getIdLocacion());
+                }
+            }
         } catch (Exception e) {
             log.error("Error al cambiar estado de estructura geográfica para país {}: {}", idPais, e.getMessage(), e);
             throw new ActualizarEntidadException("EstructuraGeografica", "Error al cambiar el estado de la estructura geográfica: " + e.getMessage());
+        }
+    }
+
+    // Cambiar estado de Locación Geográfica
+    @Transactional
+    public void cambiarEstadoLocacionGeografica(Integer idLocacion, EstadoLocacionesGeograficasEnum nuevoEstado) {
+        log.info("Cambiando estado de locación geográfica con ID: {} a {}", idLocacion, nuevoEstado);
+        LocacionGeografica entity = locacionGeograficaRepositorio.findById(idLocacion)
+                .orElseThrow(() -> new EntidadNoEncontradaException("Locación geográfica no encontrada", 2, "LocacionGeografica"));
+        try {
+            // Si se va a activar, verificar que la estructura geográfica esté ACTIVA
+            if (nuevoEstado == EstadoLocacionesGeograficasEnum.ACTIVO && entity.getEstructuraGeografica() != null) {
+                if (entity.getEstructuraGeografica().getEstado() != EstadoGeneralEnum.ACTIVO) {
+                    log.warn("No se puede activar la locación porque la estructura geográfica asociada está inactiva.");
+                    throw new ActualizarEntidadException("LocacionGeografica", "No se puede activar la locación porque la estructura geográfica asociada está inactiva.");
+                }
+            }
+            entity.setEstado(nuevoEstado);
+            locacionGeograficaRepositorio.save(entity);
+            log.info("Estado de locación geográfica con ID {} cambiado a {}.", idLocacion, nuevoEstado);
+        } catch (Exception e) {
+            log.error("Error al cambiar estado de locación geográfica {}: {}", idLocacion, e.getMessage(), e);
+            throw new ActualizarEntidadException("LocacionGeografica", "Error al cambiar el estado de la locación geográfica: " + e.getMessage());
         }
     }
 } 

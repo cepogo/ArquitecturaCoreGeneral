@@ -1,9 +1,6 @@
 package com.banquito.core.general.mapper;
 
 import com.banquito.core.general.dto.SucursalDTO;
-import com.banquito.core.general.enums.EstadoSucursalesEnum;
-import com.banquito.core.general.modelo.EntidadBancaria;
-import com.banquito.core.general.modelo.LocacionGeografica;
 import com.banquito.core.general.modelo.Sucursal;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

@@ -7,6 +7,7 @@ import com.banquito.core.general.dto.LocacionGeograficaCreacionDTO;
 import com.banquito.core.general.dto.LocacionGeograficaDTO;
 import com.banquito.core.general.dto.LocacionGeograficaUpdateDTO;
 import com.banquito.core.general.enums.EstadoGeneralEnum;
+import com.banquito.core.general.enums.EstadoLocacionesGeograficasEnum;
 import com.banquito.core.general.servicio.EstructuraLocacionGeograficaServicio;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -59,22 +60,12 @@ public class EstructuraLocacionGeograficaController {
             @ApiResponse(responseCode = "200", description = "Estado cambiado exitosamente"),
             @ApiResponse(responseCode = "404", description = "Estructura no encontrada")
     })
-    public ResponseEntity<EstructuraGeograficaDTO> cambiarEstadoEstructura(
+    public ResponseEntity<Void> cambiarEstadoEstructura(
             @PathVariable String idPais,
             @PathVariable Integer codigoNivel,
             @RequestParam EstadoGeneralEnum nuevoEstado) {
-        return ResponseEntity.ok(servicio.cambiarEstadoEstructuraGeografica(idPais, codigoNivel, nuevoEstado));
-    }
-
-    @DeleteMapping("/estructura/{idPais}/{codigoNivel}")
-    @Operation(summary = "Eliminación lógica de estructura geográfica", description = "Cambia el estado de la estructura a INACTIVO.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Estructura eliminada lógicamente"),
-            @ApiResponse(responseCode = "404", description = "Estructura no encontrada")
-    })
-    public ResponseEntity<Void> eliminarEstructura(@PathVariable String idPais, @PathVariable Integer codigoNivel) {
-        servicio.eliminarLogicoEstructuraGeografica(idPais, codigoNivel);
-        return ResponseEntity.noContent().build();
+        servicio.cambiarEstadoEstructuraGeografica(idPais, codigoNivel, nuevoEstado);
+        return ResponseEntity.ok().build();
     }
 
     // --- Locación Geográfica ---
@@ -102,15 +93,17 @@ public class EstructuraLocacionGeograficaController {
         return ResponseEntity.ok(servicio.modificarLocacionGeografica(idLocacion, dto));
     }
 
-    @DeleteMapping("/locacion/{idLocacion}")
-    @Operation(summary = "Eliminación lógica de locación geográfica", description = "Cambia el estado de la locación a INACTIVO.")
+    @PatchMapping("/locacion/{idLocacion}/estado")
+    @Operation(summary = "Cambiar estado de locación geográfica", description = "Cambia el estado (ACTIVO/INACTIVO/MANTENIMIENTO) de una locación geográfica.")
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Locación eliminada lógicamente"),
+            @ApiResponse(responseCode = "200", description = "Estado cambiado exitosamente"),
             @ApiResponse(responseCode = "404", description = "Locación no encontrada")
     })
-    public ResponseEntity<Void> eliminarLocacion(@PathVariable Integer idLocacion) {
-        servicio.eliminarLogicoLocacionGeografica(idLocacion);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> cambiarEstadoLocacion(
+            @PathVariable Integer idLocacion,
+            @RequestParam EstadoLocacionesGeograficasEnum nuevoEstado) {
+        servicio.cambiarEstadoLocacionGeografica(idLocacion, nuevoEstado);
+        return ResponseEntity.ok().build();
     }
 
     // --- Listar locaciones activas por nivel ---

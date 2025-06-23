@@ -8,7 +8,7 @@ import lombok.Setter;
 
 public class EntidadBancariaMonedaDTO {
 
-    private Integer idEntidadBancariaMoneda;
+    
 
     @Setter
     @Getter

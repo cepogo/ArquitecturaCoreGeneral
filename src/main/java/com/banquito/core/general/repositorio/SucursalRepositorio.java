@@ -1,7 +1,6 @@
 package com.banquito.core.general.repositorio;
 
 import com.banquito.core.general.modelo.EntidadBancaria;
-import com.banquito.core.general.modelo.EntidadBancariaMoneda;
 import com.banquito.core.general.modelo.Sucursal;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

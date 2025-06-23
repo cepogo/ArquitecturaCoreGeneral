@@ -56,15 +56,17 @@ public class SucursalController {
         return ResponseEntity.ok(sucursalServicio.modificarEstadoSucursal(codigo, estado));
     }
 
-    @DeleteMapping("/{codigo}")
-    @Operation(summary = "Eliminación lógica de sucursal", description = "Cambia el estado de la sucursal a INACTIVO.")
+    @PatchMapping("/{codigo}/estado")
+    @Operation(summary = "Cambiar estado de sucursal", description = "Cambia el estado de una sucursal.")
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Sucursal eliminada lógicamente"),
+            @ApiResponse(responseCode = "200", description = "Estado de sucursal cambiado exitosamente"),
             @ApiResponse(responseCode = "404", description = "Sucursal no encontrada")
     })
-    public ResponseEntity<Void> eliminarSucursal(@PathVariable String codigo) {
-        sucursalServicio.eliminarLogicoSucursal(codigo);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> cambiarEstadoSucursal(
+            @PathVariable String codigo,
+            @RequestParam EstadoSucursalesEnum nuevoEstado) {
+        sucursalServicio.cambiarEstadoSucursal(codigo, nuevoEstado);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/activas/por-locacion/{idLocacion}")
